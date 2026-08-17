@@ -1,0 +1,69 @@
+<%- include('../partials/admin-nav') %>
+
+<div class="panel-header flex-header">
+  <div>
+    <h2><i class="fas fa-tags"></i> Manage Recipe Categories</h2>
+    <p>Create and remove custom categories to organize your recipes</p>
+  </div>
+  <a href="/admin/recipes" class="btn-secondary"><i class="fas fa-arrow-left"></i> BACK TO RECIPES</a>
+</div>
+
+<!-- Add Category Form -->
+<div class="content-panel">
+  <h3>Add New Category</h3>
+  <div class="panel-divider"></div>
+  
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="login-error" style="margin-bottom: 20px;">
+      <i class="fas fa-exclamation-circle"></i> <%= error %>
+    </div>
+  <% } %>
+
+  <form action="/admin/categories/add" method="POST" class="admin-form flex-upload-form">
+    <div class="form-group flex-1">
+      <label for="name" class="sr-only">Category Name *</label>
+      <input type="text" id="name" name="name" required placeholder="e.g. Seafood, Indian, Desserts">
+    </div>
+    <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> ADD CATEGORY</button>
+  </form>
+</div>
+
+<!-- Category List Table -->
+<div class="table-container m-t-30">
+  <h3>Current Active Categories</h3>
+  <div class="panel-divider"></div>
+
+  <% if (categories.length === 0) { %>
+    <div class="empty-state">
+      <p>No categories found. Create your first category above!</p>
+    </div>
+  <% } else { %>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Category Name</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% categories.forEach((cat, index) => { %>
+          <tr>
+            <td style="width: 80px;"><%= index + 1 %></td>
+            <td><strong><%= cat.name %></strong></td>
+            <td class="td-actions">
+              <form action="/admin/categories/delete/<%= cat.id %>" method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to delete the category \'<%= cat.name %>\'? Recipes under this category won\'t be deleted but will lose their category association.');">
+                <button type="submit" class="btn-action btn-delete" title="Delete Category"><i class="fas fa-trash-alt"></i></button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+</main>
+</div>
+</body>
+</html>

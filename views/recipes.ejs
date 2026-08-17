@@ -35,6 +35,12 @@
               <span class="recipe-category-tag"><%= recipe.category %></span>
             </div>
             <div class="recipe-card-content">
+              <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                <span class="recipe-type-badge <%= recipe.type === 'Non-Veg' ? 'type-nonveg' : 'type-veg' %>" style="margin-top: 0;">
+                  <span class="type-dot-box"><span class="type-dot"></span></span>
+                  <%= recipe.type || 'Veg' %>
+                </span>
+              </div>
               <h3 class="recipe-title-link"><a href="/recipes/<%= recipe.id %>"><%= recipe.title %></a></h3>
               <p class="recipe-excerpt"><%= recipe.description %></p>
               <a href="/recipes/<%= recipe.id %>" class="btn-card">VIEW RECIPE</a>

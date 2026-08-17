@@ -13,6 +13,7 @@
   
   <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/png" href="/favicon.png">
   
   <!-- CSS -->
   <link rel="stylesheet" href="/css/style.css">
@@ -31,11 +32,7 @@
         <%= settings.tagline %>
       </div>
       <div class="top-actions">
-        <% if (session && session.isAdmin) { %>
-          <a href="/admin" class="btn-top-admin"><i class="fas fa-user-cog"></i> Admin Panel</a>
-        <% } else { %>
-          <a href="#newsletter-section" class="btn-subscribe-top">Subscribe</a>
-        <% } %>
+        <a href="#newsletter-section" class="btn-subscribe-top">Subscribe</a>
       </div>
     </div>
   </div>
@@ -89,9 +86,6 @@
         <li><a href="/sustainability">Sustainability</a></li>
         <li><a href="/about">About Me</a></li>
         <li><a href="/contact">Contact Me</a></li>
-        <% if (session && session.isAdmin) { %>
-          <li class="admin-link-mobile"><a href="/admin"><i class="fas fa-user-cog"></i> Admin Panel</a></li>
-        <% } %>
       </ul>
     </nav>
     <div class="drawer-footer">

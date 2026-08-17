@@ -9,17 +9,27 @@
   <form action="<%= recipe ? `/admin/recipes/edit/${recipe.id}` : '/admin/recipes/add' %>" method="POST" enctype="multipart/form-data" class="admin-form">
     
     <div class="form-row">
-      <div class="form-group col-8">
+      <div class="form-group col-6">
         <label for="title">Recipe Title *</label>
         <input type="text" id="title" name="title" value="<%= recipe ? recipe.title : '' %>" required placeholder="e.g. Pan-Seared Sea Bass">
       </div>
-      <div class="form-group col-4">
-        <label for="category">Recipe Category *</label>
+      <div class="form-group col-3">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+          <label for="category">Category *</label>
+          <a href="#" id="quick-add-category-btn" style="font-size: 9px; text-transform: uppercase; color: var(--admin-blue); font-weight: 600; text-decoration: none;"><i class="fas fa-plus"></i> Add</a>
+        </div>
         <select id="category" name="category" required>
-          <option value="" disabled <%= !recipe ? 'selected' : '' %>>Select Category...</option>
-          <% ['Fish', 'Chicken', 'Beef', 'Pork', 'Vegetables', 'Salads', 'Soups'].forEach(cat => { %>
-            <option value="<%= cat %>" <%= (recipe && recipe.category === cat) ? 'selected' : '' %>><%= cat %></option>
+          <option value="" disabled <%= !recipe ? 'selected' : '' %>>Select...</option>
+          <% categories.forEach(cat => { %>
+            <option value="<%= cat.name %>" <%= (recipe && recipe.category === cat.name) ? 'selected' : '' %>><%= cat.name %></option>
           <% }) %>
+        </select>
+      </div>
+      <div class="form-group col-3">
+        <label for="type">Recipe Type *</label>
+        <select id="type" name="type" required>
+          <option value="Veg" <%= (recipe && recipe.type === 'Veg') ? 'selected' : '' %>>Veg 🌱</option>
+          <option value="Non-Veg" <%= (!recipe || recipe.type === 'Non-Veg') ? 'selected' : '' %>>Non-Veg 🍗</option>
         </select>
       </div>
     </div>
@@ -63,6 +73,42 @@
 
   </form>
 </div>
+
+<script>
+  document.getElementById('quick-add-category-btn').addEventListener('click', async function(e) {
+    e.preventDefault();
+    const name = prompt("Enter new category name:");
+    if (!name || name.trim().length === 0) return;
+    
+    try {
+      const response = await fetch('/admin/categories/add-json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: name.trim() })
+      });
+      
+      const data = await response.json();
+      if (response.ok && data.success) {
+        const select = document.getElementById('category');
+        
+        // Append new option
+        const option = document.createElement('option');
+        option.value = data.category.name;
+        option.textContent = data.category.name;
+        option.selected = true;
+        select.appendChild(option);
+        
+        alert(`Category "${data.category.name}" added successfully!`);
+      } else {
+        alert(data.error || 'Failed to add category');
+      }
+    } catch (error) {
+      alert('Error adding category: ' + error.message);
+    }
+  });
+</script>
 
 </main>
 </div>

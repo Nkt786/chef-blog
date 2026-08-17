@@ -623,6 +623,41 @@ h1, h2, h3, h4, h5, h6 {
   padding: 5px 10px;
 }
 
+.recipe-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.type-dot-box {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.type-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.type-veg {
+  color: #27ae60;
+}
+
+.type-nonveg {
+  color: #c0392b;
+}
+
 .recipe-card-content {
   padding: 25px;
   display: flex;

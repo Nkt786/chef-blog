@@ -9,6 +9,12 @@
       <h1 class="recipe-detail-title"><%= recipe.title %></h1>
       <p class="recipe-detail-desc"><%= recipe.description %></p>
       <div class="recipe-detail-meta">
+        <span style="display: inline-flex; align-items: center;">
+          <span class="recipe-type-badge <%= recipe.type === 'Non-Veg' ? 'type-nonveg' : 'type-veg' %>" style="margin-top: 0;">
+            <span class="type-dot-box"><span class="type-dot"></span></span>
+            <%= recipe.type || 'Veg' %>
+          </span>
+        </span>
         <span><i class="far fa-user"></i> Crafted by Chef Nitesh Sharma</span>
         <span><i class="far fa-calendar-alt"></i> <%= new Date(recipe.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></span>
       </div>

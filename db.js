@@ -174,7 +174,16 @@ const DEFAULT_DATA = {
     }
   ],
   contacts: [],
-  subscribers: []
+  subscribers: [],
+  categories: [
+    { id: 'cat1', name: 'Fish' },
+    { id: 'cat2', name: 'Chicken' },
+    { id: 'cat3', name: 'Beef' },
+    { id: 'cat4', name: 'Pork' },
+    { id: 'cat5', name: 'Vegetables' },
+    { id: 'cat6', name: 'Salads' },
+    { id: 'cat7', name: 'Soups' }
+  ]
 };
 
 let cachedData = null;
@@ -185,6 +194,21 @@ async function readDb() {
   try {
     const data = await fs.readFile(DB_FILE, 'utf8');
     cachedData = JSON.parse(data);
+    
+    // Safety check: Backfill categories if missing in existing data.json
+    if (!cachedData.categories) {
+      cachedData.categories = [
+        { id: 'cat1', name: 'Fish' },
+        { id: 'cat2', name: 'Chicken' },
+        { id: 'cat3', name: 'Beef' },
+        { id: 'cat4', name: 'Pork' },
+        { id: 'cat5', name: 'Vegetables' },
+        { id: 'cat6', name: 'Salads' },
+        { id: 'cat7', name: 'Soups' }
+      ];
+      await writeDb(cachedData);
+    }
+    
     return cachedData;
   } catch (error) {
     // If file doesn't exist, create it with default data

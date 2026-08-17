@@ -181,8 +181,9 @@ app.get('/recipes', async (req, res) => {
   const recipes = await db.get('recipes');
   const categoryFilter = req.query.category || 'All';
   
-  // Recipe categories required: Fish, Chicken, Beef, Pork, Vegetables, Salads, Soups
-  const categories = ['Fish', 'Chicken', 'Beef', 'Pork', 'Vegetables', 'Salads', 'Soups'];
+  // Load categories dynamically from database
+  const dbCategories = await db.get('categories');
+  const categories = dbCategories.map(c => c.name);
 
   let filteredRecipes = recipes;
   if (categoryFilter !== 'All') {
@@ -384,12 +385,13 @@ app.get('/admin/recipes', checkAuth, async (req, res) => {
   res.render('admin/recipes', { recipes });
 });
 
-app.get('/admin/recipes/add', checkAuth, (req, res) => {
-  res.render('admin/recipes-form', { recipe: null });
+app.get('/admin/recipes/add', checkAuth, async (req, res) => {
+  const categories = await db.get('categories');
+  res.render('admin/recipes-form', { recipe: null, categories });
 });
 
 app.post('/admin/recipes/add', checkAuth, upload.array('images', 5), async (req, res) => {
-  const { title, description, category, ingredients, method } = req.body;
+  const { title, description, category, type, ingredients, method } = req.body;
   
   const images = req.files && req.files.length > 0 
     ? req.files.map(f => `/uploads/${f.filename}`) 
@@ -403,6 +405,7 @@ app.post('/admin/recipes/add', checkAuth, upload.array('images', 5), async (req,
     title,
     description,
     category,
+    type: type || 'Veg',
     ingredients: ingredientsArray,
     method: methodArray,
     images
@@ -413,14 +416,15 @@ app.post('/admin/recipes/add', checkAuth, upload.array('images', 5), async (req,
 app.get('/admin/recipes/edit/:id', checkAuth, async (req, res) => {
   const recipe = await db.getById('recipes', req.params.id);
   if (!recipe) return res.redirect('/admin/recipes');
-  res.render('admin/recipes-form', { recipe });
+  const categories = await db.get('categories');
+  res.render('admin/recipes-form', { recipe, categories });
 });
 
 app.post('/admin/recipes/edit/:id', checkAuth, upload.array('images', 5), async (req, res) => {
   const recipe = await db.getById('recipes', req.params.id);
   if (!recipe) return res.redirect('/admin/recipes');
 
-  const { title, description, category, ingredients, method } = req.body;
+  const { title, description, category, type, ingredients, method } = req.body;
   const ingredientsArray = ingredients.split('\n').map(i => i.trim()).filter(i => i.length > 0);
   const methodArray = method.split('\n').map(m => m.trim()).filter(m => m.length > 0);
 
@@ -428,6 +432,7 @@ app.post('/admin/recipes/edit/:id', checkAuth, upload.array('images', 5), async 
     title,
     description,
     category,
+    type: type || 'Veg',
     ingredients: ingredientsArray,
     method: methodArray
   };
@@ -438,6 +443,51 @@ app.post('/admin/recipes/edit/:id', checkAuth, upload.array('images', 5), async 
 
   await db.update('recipes', req.params.id, updateData);
   res.redirect('/admin/recipes');
+});
+
+
+// --- ADMIN: RECIPES CATEGORIES ---
+app.get('/admin/categories', checkAuth, async (req, res) => {
+  const categories = await db.get('categories');
+  res.render('admin/categories', { categories, error: req.query.error });
+});
+
+app.post('/admin/categories/add', checkAuth, async (req, res) => {
+  const { name } = req.body;
+  if (!name || name.trim().length === 0) {
+    return res.redirect('/admin/categories?error=Category+name+is+required');
+  }
+  
+  // Check duplicate
+  const categories = await db.get('categories');
+  const duplicate = categories.some(c => c.name.toLowerCase() === name.trim().toLowerCase());
+  if (duplicate) {
+    return res.redirect('/admin/categories?error=Category+already+exists');
+  }
+
+  await db.insert('categories', { name: name.trim() });
+  res.redirect('/admin/categories');
+});
+
+app.post('/admin/categories/delete/:id', checkAuth, async (req, res) => {
+  await db.delete('categories', req.params.id);
+  res.redirect('/admin/categories');
+});
+
+app.post('/admin/categories/add-json', checkAuth, async (req, res) => {
+  const { name } = req.body;
+  if (!name || name.trim().length === 0) {
+    return res.status(400).json({ error: 'Category name is required' });
+  }
+  
+  const categories = await db.get('categories');
+  const duplicate = categories.some(c => c.name.toLowerCase() === name.trim().toLowerCase());
+  if (duplicate) {
+    return res.status(400).json({ error: 'Category already exists' });
+  }
+
+  const newCat = await db.insert('categories', { name: name.trim() });
+  res.json({ success: true, category: newCat });
 });
 
 app.post('/admin/recipes/delete/:id', checkAuth, async (req, res) => {
