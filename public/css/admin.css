@@ -966,3 +966,166 @@ body.login-body {
 .login-footer a:hover {
   color: #96a58d;
 }
+
+/* ========================================================
+   RESPONSIVE ADMIN PANEL MEDIA QUERIES
+   ======================================================== */
+@media (max-width: 768px) {
+  .admin-wrapper {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    min-height: auto;
+  }
+
+  .sidebar-brand {
+    padding: 20px 24px 10px;
+    border-bottom: none;
+    text-align: center;
+  }
+
+  .sidebar-menu {
+    padding: 10px 15px;
+  }
+
+  .sidebar-menu ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .sidebar-menu li {
+    margin: 0;
+  }
+
+  .sidebar-menu a {
+    padding: 8px 14px;
+    font-size: 12px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .sidebar-menu a:hover,
+  .sidebar-menu a.active {
+    border-left: none;
+    border-bottom: none;
+    background-color: #96a58d;
+    color: #fff;
+  }
+
+  .sidebar-footer {
+    padding: 10px 24px 20px;
+    border-top: none;
+    display: flex;
+    justify-content: center;
+  }
+
+  .admin-main {
+    margin-left: 0;
+  }
+
+  .admin-header {
+    padding: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    text-align: left;
+  }
+
+  .admin-content {
+    padding: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+
+  .stat-card {
+    padding: 15px;
+    gap: 12px;
+  }
+
+  .stat-number {
+    font-size: 20px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .form-group.col-2,
+  .form-group.col-3,
+  .form-group.col-4,
+  .form-group.col-5,
+  .form-group.col-6,
+  .form-group.col-8,
+  .form-group.col-9 {
+    width: 100% !important;
+  }
+
+  .table-container {
+    padding: 15px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-table {
+    min-width: 650px;
+  }
+
+  .media-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  .panel-header.flex-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .panel-header.flex-header .btn-primary {
+    width: 100%;
+    text-align: center;
+  }
+
+  .add-journey-panel .admin-form button {
+    width: 100%;
+  }
+
+  .content-panel {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .media-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar-menu ul {
+    gap: 5px;
+  }
+
+  .sidebar-menu a {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .modal-content {
+    padding: 20px;
+  }
+}
