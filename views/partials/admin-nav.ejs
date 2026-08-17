@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Chef Nitesh Sharma</title>
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+
+  <div class="admin-wrapper">
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-brand">
+        <h2>Chef Nitesh</h2>
+        <span>ADMIN CONSOLE</span>
+      </div>
+      <nav class="sidebar-menu">
+        <ul>
+          <li><a href="/admin"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+          <li><a href="/admin/blogs"><i class="fas fa-newspaper"></i> Manage Blogs</a></li>
+          <li><a href="/admin/recipes"><i class="fas fa-utensils"></i> Manage Recipes</a></li>
+          <li><a href="/admin/journey"><i class="fas fa-history"></i> Manage Journey</a></li>
+          <li><a href="/admin/sustainability"><i class="fas fa-leaf"></i> Sustainability</a></li>
+          <li><a href="/admin/media"><i class="fas fa-images"></i> Media Gallery</a></li>
+          <li><a href="/admin/contacts"><i class="fas fa-envelope"></i> Contact Enquiries</a></li>
+          <li><a href="/admin/newsletter"><i class="fas fa-users"></i> Subscribers</a></li>
+          <li><a href="/" target="_blank"><i class="fas fa-external-link-alt"></i> View Website</a></li>
+        </ul>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/admin/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </div>
+    </aside>
+
+    <!-- Main Content Container -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <div class="header-welcome">
+          <h1>Welcome, Chef Nitesh</h1>
+          <p class="current-date"><%= new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+        </div>
+      </header>
+      <div class="admin-content">

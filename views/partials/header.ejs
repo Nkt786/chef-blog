@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title + ' | ' : '' %>Chef Nitesh Sharma - Aroma of Life</title>
+  <meta name="description" content="Personal chef portfolio, food blog, and recipes by Chef Nitesh Sharma. Crafting stories on a plate.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Top Utilities Bar -->
+  <div class="top-bar">
+    <div class="container top-bar-container">
+      <div class="social-links">
+        <a href="https://www.linkedin.com/in/chefnitesh/" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        <a href="https://wa.me/919521342251" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="mailto:Niteshind84@yahoo.com" title="Email"><i class="far fa-envelope"></i></a>
+      </div>
+      <div class="tagline-top">
+        <%= settings.tagline %>
+      </div>
+      <div class="top-actions">
+        <% if (session && session.isAdmin) { %>
+          <a href="/admin" class="btn-top-admin"><i class="fas fa-user-cog"></i> Admin Panel</a>
+        <% } else { %>
+          <a href="#newsletter-section" class="btn-subscribe-top">Subscribe</a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header & Brand Logo -->
+  <header class="main-header">
+    <div class="container header-container">
+      <div class="logo-area">
+        <a href="/" class="brand-logo">
+          <span class="logo-title"><%= settings.brandName.toUpperCase() %></span>
+          <span class="logo-subtitle"><%= settings.shortDescription %></span>
+        </a>
+      </div>
+      
+      <!-- Desktop Navigation Menu -->
+      <nav class="desktop-nav">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/blog">Blog</a></li>
+          <li><a href="/journey">Journey</a></li>
+          <li><a href="/recipes">Recipes</a></li>
+          <li><a href="/sustainability">Sustainability</a></li>
+          <li><a href="/about">About Me</a></li>
+          <li><a href="/contact">Contact Me</a></li>
+        </ul>
+      </nav>
+
+      <!-- Mobile Nav Toggle -->
+      <button class="mobile-nav-toggle" aria-label="Toggle Navigation">
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer Menu -->
+  <div class="mobile-drawer">
+    <div class="drawer-header">
+      <div class="drawer-logo">
+        <span class="logo-title"><%= settings.brandName.toUpperCase() %></span>
+      </div>
+      <button class="drawer-close" aria-label="Close Navigation">&times;</button>
+    </div>
+    <nav class="mobile-nav">
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/blog">Blog</a></li>
+        <li><a href="/journey">Journey</a></li>
+        <li><a href="/recipes">Recipes</a></li>
+        <li><a href="/sustainability">Sustainability</a></li>
+        <li><a href="/about">About Me</a></li>
+        <li><a href="/contact">Contact Me</a></li>
+        <% if (session && session.isAdmin) { %>
+          <li class="admin-link-mobile"><a href="/admin"><i class="fas fa-user-cog"></i> Admin Panel</a></li>
+        <% } %>
+      </ul>
+    </nav>
+    <div class="drawer-footer">
+      <div class="social-links-drawer">
+        <a href="https://www.linkedin.com/in/chefnitesh/" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+        <a href="https://wa.me/919521342251" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        <a href="mailto:Niteshind84@yahoo.com"><i class="far fa-envelope"></i></a>
+      </div>
+      <p class="drawer-tagline">"Crafting Stories on a Plate"</p>
+    </div>
+  </div>
+  <div class="drawer-overlay"></div>

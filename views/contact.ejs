@@ -1,0 +1,124 @@
+<%- include('partials/header', { title: 'Contact Me' }) %>
+
+<section class="page-title-section fade-in-up">
+  <div class="container">
+    <span class="page-subtitle"><%= settings.contactSubtitle || 'Get In Touch' %></span>
+    <h1 class="page-title"><%= settings.contactHeading || 'Contact Chef Nitesh' %></h1>
+    <div class="section-line"></div>
+  </div>
+</section>
+
+<section class="contact-page-section">
+  <div class="container contact-container">
+    
+    <!-- Left Column: Contact details & cards -->
+    <div class="contact-info-column fade-in-up">
+      <h2>Let's Craft Something Together</h2>
+      <p class="contact-intro-text">
+        Have questions about recipe consulting, menu engineering, or want to discuss a sustainable food project? Contact me using the details below or drop a message through the form.
+      </p>
+
+      <div class="contact-cards-grid">
+        
+        <!-- WhatsApp -->
+        <a href="https://wa.me/919521342251" target="_blank" class="contact-detail-card">
+          <div class="card-icon whatsapp-color"><i class="fab fa-whatsapp"></i></div>
+          <div class="card-details">
+            <h3>WhatsApp</h3>
+            <p>+91-9521342251</p>
+            <span class="card-cta">Message Now <i class="fas fa-chevron-right"></i></span>
+          </div>
+        </a>
+
+        <!-- Phone -->
+        <a href="tel:+919521342251" class="contact-detail-card">
+          <div class="card-icon phone-color"><i class="fas fa-phone-alt"></i></div>
+          <div class="card-details">
+            <h3>Call Me</h3>
+            <p>+91-9521342251</p>
+            <span class="card-cta">Call Now <i class="fas fa-chevron-right"></i></span>
+          </div>
+        </a>
+
+        <!-- Email -->
+        <a href="mailto:Niteshind84@yahoo.com" class="contact-detail-card">
+          <div class="card-icon email-color"><i class="far fa-envelope"></i></div>
+          <div class="card-details">
+            <h3>Email</h3>
+            <p>Niteshind84@yahoo.com</p>
+            <span class="card-cta">Send Email <i class="fas fa-chevron-right"></i></span>
+          </div>
+        </a>
+
+        <!-- LinkedIn -->
+        <a href="https://www.linkedin.com/in/chefnitesh/" target="_blank" class="contact-detail-card">
+          <div class="card-icon linkedin-color"><i class="fab fa-linkedin-in"></i></div>
+          <div class="card-details">
+            <h3>LinkedIn</h3>
+            <p>chefnitesh</p>
+            <span class="card-cta">View Profile <i class="fas fa-chevron-right"></i></span>
+          </div>
+        </a>
+
+      </div>
+
+      <!-- Quick Newsletter Card -->
+      <div class="contact-newsletter-card">
+        <h3>Subscribe to Chef Newsletter</h3>
+        <p>Stay updated with seasonal recipe releases and zero-waste cooking methods directly from my kitchen.</p>
+        <form action="/newsletter" method="POST" class="contact-newsletter-form">
+          <input type="email" name="email" placeholder="Enter your email" required aria-label="Newsletter email">
+          <button type="submit" class="btn-card">SUBSCRIBE</button>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Interactive Form -->
+    <div class="contact-form-column fade-in-up">
+      <div class="contact-form-box">
+        <h3>Send a Message</h3>
+        <div class="form-line"></div>
+        
+        <% if (success) { %>
+          <div class="alert-box success-alert">
+            <i class="fas fa-check-circle"></i> Thank you! Your enquiry has been sent successfully. Chef Nitesh will contact you shortly.
+          </div>
+        <% } %>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="alert-box error-alert">
+            <i class="fas fa-exclamation-circle"></i> <%= error %>
+          </div>
+        <% } %>
+
+        <form action="/contact" method="POST" class="chef-contact-form">
+          <div class="form-group">
+            <label for="name">Your Name *</label>
+            <input type="text" id="name" name="name" required placeholder="e.g. John Doe">
+          </div>
+
+          <div class="form-group">
+            <label for="email">Your Email Address *</label>
+            <input type="email" id="email" name="email" required placeholder="e.g. john@example.com">
+          </div>
+
+          <div class="form-group">
+            <label for="subject">Subject</label>
+            <input type="text" id="subject" name="subject" placeholder="e.g. Consulting enquiry, Recipe feedback">
+          </div>
+
+          <div class="form-group">
+            <label for="message">Message *</label>
+            <textarea id="message" name="message" rows="6" required placeholder="Type your message details here..."></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit-contact">SEND MESSAGE</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<%- include('partials/footer') %>

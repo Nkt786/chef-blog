@@ -1,0 +1,50 @@
+<%- include('partials/header', { title: 'Recipes' }) %>
+
+<section class="page-title-section fade-in-up">
+  <div class="container">
+    <span class="page-subtitle"><%= settings.recipeSubtitle || 'From the Chef\'s Notebook' %></span>
+    <h1 class="page-title"><%= settings.recipeHeading || 'Culinary Recipes' %></h1>
+    <div class="section-line"></div>
+  </div>
+</section>
+
+<!-- Recipes Layout Section -->
+<section class="recipes-page-section">
+  <div class="container">
+    
+    <!-- Category Tabs Navigation -->
+    <div class="recipe-categories-tabs scroll-reveal">
+      <a href="/recipes" class="category-tab <%= selectedCategory === 'All' ? 'active' : '' %>">All Recipes</a>
+      <% categories.forEach(cat => { %>
+        <a href="/recipes?category=<%= cat %>" class="category-tab <%= selectedCategory === cat ? 'active' : '' %>"><%= cat %></a>
+      <% }) %>
+    </div>
+
+    <!-- Recipes Cards Grid -->
+    <% if (recipes.length === 0) { %>
+      <div class="no-recipes scroll-reveal">
+        <p>No recipes found in the <strong><%= selectedCategory %></strong> category yet.</p>
+        <p><a href="/recipes" class="btn-card">Show All Recipes</a></p>
+      </div>
+    <% } else { %>
+      <div class="recipes-grid scroll-reveal">
+        <% recipes.forEach(recipe => { %>
+          <article class="recipe-card">
+            <div class="recipe-card-image">
+              <img src="<%= recipe.images[0] %>" alt="<%= recipe.title %>">
+              <span class="recipe-category-tag"><%= recipe.category %></span>
+            </div>
+            <div class="recipe-card-content">
+              <h3 class="recipe-title-link"><a href="/recipes/<%= recipe.id %>"><%= recipe.title %></a></h3>
+              <p class="recipe-excerpt"><%= recipe.description %></p>
+              <a href="/recipes/<%= recipe.id %>" class="btn-card">VIEW RECIPE</a>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    <% } %>
+
+  </div>
+</section>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,79 @@
+<%- include('partials/header', { title: 'About Me' }) %>
+
+<section class="page-title-section fade-in-up">
+  <div class="container">
+    <span class="page-subtitle"><%= settings.aboutSubtitle || 'The Culinary Story' %></span>
+    <h1 class="page-title"><%= settings.aboutHeading || 'About Chef Nitesh' %></h1>
+    <div class="section-line"></div>
+  </div>
+</section>
+
+<section class="about-page-section">
+  <div class="container about-container">
+    
+    <!-- Profile & Main Bio Grid -->
+    <div class="about-main-grid fade-in-up">
+      <div class="about-image-box">
+        <img src="/images/chef-portrait.jpg" alt="Chef Nitesh Sharma in the Kitchen">
+        <div class="about-image-caption">Chef Nitesh Sharma</div>
+      </div>
+      
+      <div class="about-text-box">
+        <span class="chef-title-tag">Classically Trained | over 15 Years Experience</span>
+        <h2>"Cooking is an art form driven by passion and executed with precision."</h2>
+        
+        <p class="bio-paragraph highlight-paragraph">
+          Chef Nitesh Sharma is a classically trained culinary professional with over 15 years of experience leading and elevating high-volume Mediterranean kitchens. For him, cooking is an art form driven by passion and executed with precision.
+        </p>
+        
+        <p class="bio-paragraph">
+          Throughout his career, his vision has extended beyond crafting exquisite dishes. He focuses on orchestrating the complete guest journey, blending traditional Mediterranean flavors with modern culinary techniques and creating innovative, seasonal programs.
+        </p>
+
+        <p class="bio-paragraph">
+          From direct partnerships with local biodiverse farms to curating zero-waste kitchen workflows, Chef Nitesh believes that chef leadership is essential in shaping sustainable eating cultures.
+        </p>
+        
+        <div class="about-signature-container">
+          <p class="sig-name">Nitesh Sharma</p>
+          <p class="sig-title">Executive Chef & Culinary Consultant</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Core Specialties / Strengths -->
+    <div class="about-specialties-section scroll-reveal">
+      <h3 class="specialties-title">Core Areas of Expertise</h3>
+      <div class="specialties-grid">
+        
+        <div class="specialty-card">
+          <div class="specialty-icon"><i class="fas fa-seedling"></i></div>
+          <h4>Seasonal Mediterranean Menus</h4>
+          <p>Highlighting fresh seafood, extra virgin olive oil, wild herbs, and vibrant citrus zest with authentic techniques.</p>
+        </div>
+
+        <div class="specialty-card">
+          <div class="specialty-icon"><i class="fas fa-fire"></i></div>
+          <h4>Contemporary Cooking Methods</h4>
+          <p>Integrating precision sous-vide cooking, artisanal charcoal grilling, and traditional sourdough fermentation.</p>
+        </div>
+
+        <div class="specialty-card">
+          <div class="specialty-icon"><i class="fas fa-leaf"></i></div>
+          <h4>Zero-Waste Kitchen Design</h4>
+          <p>Creating sustainable menu programs that optimize inventory, minimize waste, and utilize local biodiverse supply chains.</p>
+        </div>
+
+        <div class="specialty-card">
+          <div class="specialty-icon"><i class="fas fa-users"></i></div>
+          <h4>Kitchen Team Leadership</h4>
+          <p>Training and mentoring kitchen staff in precision techniques, sanitation protocols, and high-standard operations.</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<%- include('partials/footer') %>

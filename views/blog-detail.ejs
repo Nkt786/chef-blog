@@ -1,0 +1,73 @@
+<%- include('partials/header', { title: blog.title }) %>
+
+<article class="blog-detail-section fade-in-up">
+  <div class="container blog-detail-container">
+    
+    <!-- Left: Blog Detail Content -->
+    <main class="blog-detail-main">
+      <header class="blog-detail-header">
+        <span class="blog-detail-year"><%= blog.year %> Collection</span>
+        <h1 class="blog-detail-title"><%= blog.title %></h1>
+        <div class="blog-detail-meta">
+          <span><i class="far fa-calendar-alt"></i> <%= new Date(blog.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></span>
+          <span>By Chef Nitesh Sharma</span>
+        </div>
+      </header>
+
+      <div class="blog-detail-featured-image">
+        <img src="<%= blog.image %>" alt="<%= blog.title %>">
+      </div>
+
+      <div class="blog-detail-content entry-content">
+        <%- blog.content %>
+      </div>
+
+      <div class="blog-detail-footer">
+        <div class="blog-share">
+          <span>Share:</span>
+          <a href="https://wa.me/?text=<%= encodeURIComponent(blog.title + ' - http://localhost:3000/blog/' + blog.id) %>" target="_blank" title="Share on WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="https://www.linkedin.com/sharing/share-offsite/?url=<%= encodeURIComponent('http://localhost:3000/blog/' + blog.id) %>" target="_blank" title="Share on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+        <a href="/blog" class="btn-back-blogs"><i class="fas fa-arrow-left"></i> Back to Blog Portfolio</a>
+      </div>
+    </main>
+
+    <!-- Right: Sidebar -->
+    <aside class="blog-sidebar">
+      
+      <!-- Recent Posts Widget -->
+      <div class="sidebar-widget">
+        <h3 class="widget-title">Recent Stories</h3>
+        <ul class="sidebar-recent-posts">
+          <% recentBlogs.forEach(recent => { %>
+            <li>
+              <div class="recent-post-thumb">
+                <img src="<%= recent.image %>" alt="<%= recent.title %>">
+              </div>
+              <div class="recent-post-info">
+                <a href="/blog/<%= recent.id %>" class="recent-post-title"><%= recent.title %></a>
+                <span class="recent-post-date"><%= new Date(recent.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+              </div>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+
+      <!-- Quick Bio Widget -->
+      <div class="sidebar-widget about-widget">
+        <h3 class="widget-title">The Chef</h3>
+        <div class="chef-widget-image">
+          <img src="/images/chef-portrait.jpg" alt="Chef Nitesh Sharma Portrait">
+        </div>
+        <p class="chef-widget-intro">
+          Chef Nitesh Sharma is a classically trained culinary professional specializing in modern Mediterranean menus, farm-to-table cuisine, and zero-waste kitchen practices.
+        </p>
+        <a href="/about" class="widget-link">My Story <i class="fas fa-arrow-right"></i></a>
+      </div>
+
+    </aside>
+
+  </div>
+</article>
+
+<%- include('partials/footer') %>

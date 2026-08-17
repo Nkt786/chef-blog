@@ -1,0 +1,63 @@
+<%- include('../partials/admin-nav') %>
+
+<div class="panel-header">
+  <h2><%= blog ? 'Edit Blog Post' : 'Add New Blog Post' %></h2>
+  <p><%= blog ? `Editing: ${blog.title}` : 'Draft and publish a new story' %></p>
+</div>
+
+<div class="content-panel">
+  <form action="<%= blog ? `/admin/blogs/edit/${blog.id}` : '/admin/blogs/add' %>" method="POST" enctype="multipart/form-data" class="admin-form">
+    
+    <div class="form-group">
+      <label for="title">Blog Title *</label>
+      <input type="text" id="title" name="title" value="<%= blog ? blog.title : '' %>" required placeholder="e.g. Masterclass on Seafood Stock Reductions">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-6">
+        <label for="year">Publication Year *</label>
+        <input type="text" id="year" name="year" value="<%= blog ? blog.year : new Date().getFullYear().toString() %>" required placeholder="e.g. 2026">
+      </div>
+      <div class="form-group col-6">
+        <label for="image">Featured Image</label>
+        <input type="file" id="image" name="image" accept="image/*">
+        <% if (blog && blog.image) { %>
+          <div class="form-image-preview">
+            <p>Current image:</p>
+            <img src="<%= blog.image %>" alt="Current Image" class="preview-thumb">
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="excerpt">Short Description/Excerpt *</label>
+      <textarea id="excerpt" name="excerpt" rows="2" required placeholder="Enter a brief teaser sentence..."><%= blog ? blog.excerpt : '' %></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="content">Full Blog Content (HTML allowed) *</label>
+      <textarea id="content" name="content" rows="12" required placeholder="<p>Write your detailed blog post story here...</p>"><%= blog ? blog.content : '' %></textarea>
+      <small class="form-help">You can write standard text or use raw HTML tags (like &lt;p&gt;, &lt;h3&gt;, &lt;strong&gt;, &lt;ul&gt;, &lt;li&gt;) to format your article content.</small>
+    </div>
+
+    <div class="form-group checkbox-group">
+      <label class="switch-container">
+        <input type="checkbox" id="published" name="published" value="true" <%= (blog && blog.published) ? 'checked' : (!blog ? 'checked' : '') %>>
+        <span class="switch-slider"></span>
+        <span class="switch-label">Publish this post (visible on website immediately)</span>
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">SAVE POST</button>
+      <a href="/admin/blogs" class="btn-secondary">CANCEL</a>
+    </div>
+
+  </form>
+</div>
+
+</main>
+</div>
+</body>
+</html>

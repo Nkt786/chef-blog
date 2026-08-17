@@ -1,0 +1,79 @@
+<%- include('partials/header', { title: recipe.title }) %>
+
+<article class="recipe-detail-section fade-in-up">
+  <div class="container recipe-detail-container">
+    
+    <!-- Recipe Detail Header -->
+    <header class="recipe-detail-header">
+      <span class="recipe-detail-cat"><%= recipe.category %> Recipe</span>
+      <h1 class="recipe-detail-title"><%= recipe.title %></h1>
+      <p class="recipe-detail-desc"><%= recipe.description %></p>
+      <div class="recipe-detail-meta">
+        <span><i class="far fa-user"></i> Crafted by Chef Nitesh Sharma</span>
+        <span><i class="far fa-calendar-alt"></i> <%= new Date(recipe.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></span>
+      </div>
+    </header>
+
+    <!-- Main Recipe Image -->
+    <div class="recipe-detail-image">
+      <img src="<%= recipe.images[0] %>" alt="<%= recipe.title %>">
+    </div>
+
+    <!-- Recipe Content: Ingredients & Method -->
+    <div class="recipe-detail-content">
+      
+      <!-- Ingredients Column -->
+      <div class="recipe-ingredients">
+        <h2 class="recipe-section-title"><i class="fas fa-list-ul"></i> Ingredients</h2>
+        <ul class="ingredients-list">
+          <% recipe.ingredients.forEach(ingredient => { %>
+            <li>
+              <label class="ingredient-item">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+                <span class="ingredient-text"><%= ingredient %></span>
+              </label>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+
+      <!-- Method Column -->
+      <div class="recipe-method">
+        <h2 class="recipe-section-title"><i class="fas fa-tasks"></i> Preparation Method</h2>
+        <ol class="method-list">
+          <% recipe.method.forEach((step, index) => { %>
+            <li class="method-step">
+              <span class="step-number"><%= index + 1 %></span>
+              <div class="step-text">
+                <p><%= step %></p>
+              </div>
+            </li>
+          <% }) %>
+        </ol>
+      </div>
+
+    </div>
+
+    <!-- Additional Images Gallery (if more than 1 image) -->
+    <% if (recipe.images.length > 1) { %>
+      <div class="recipe-gallery-section">
+        <h3 class="recipe-section-title">Dish Presentation Gallery</h3>
+        <div class="recipe-gallery-grid">
+          <% recipe.images.slice(1).forEach((img, idx) => { %>
+            <div class="recipe-gallery-item">
+              <img src="<%= img %>" alt="<%= recipe.title %> presentation step <%= idx + 1 %>">
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+    <div class="recipe-detail-footer">
+      <a href="/recipes" class="btn-back-recipes"><i class="fas fa-arrow-left"></i> Back to Recipes List</a>
+    </div>
+
+  </div>
+</article>
+
+<%- include('partials/footer') %>

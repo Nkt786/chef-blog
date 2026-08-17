@@ -1,0 +1,187 @@
+<%- include('partials/header', { title: 'Home' }) %>
+
+<!-- Main Hero Section -->
+<section class="hero-section fade-in-up">
+  <div class="container hero-container">
+    <div class="hero-image-side">
+      <img src="/images/recipe-salmon.jpg" alt="Chef Nitesh Sharma Plated Dish">
+    </div>
+    <div class="hero-text-side">
+      <span class="hero-tag">Aroma of Life</span>
+      <h1 class="hero-title">Crafting Stories on a Plate</h1>
+      <p class="hero-description">
+        Classically trained culinary professional with over 15 years of experience leading high-volume Mediterranean kitchens. For Chef Nitesh, cooking is an art form driven by passion and executed with precision.
+      </p>
+      <a href="/about" class="btn-hero">READ MORE</a>
+    </div>
+  </div>
+</section>
+
+<!-- Chef Bio Intro Banner -->
+<section class="intro-section scroll-reveal">
+  <div class="container intro-container">
+    <div class="intro-content">
+      <h2 class="section-title">The Culinary Philosophy</h2>
+      <p class="intro-quote">"A plate of food is a canvas. It should tell a story of the soil it grew in, the hands that cultivated it, and the culture that inspired it."</p>
+      <p class="intro-text">
+        Every seasonal program is orchestrated to guide guests on a sensory journey, blending traditional Mediterranean flavors with contemporary cooking techniques and a deep commitment to sustainable culinary systems.
+      </p>
+      <div class="intro-signature">Chef Nitesh Sharma</div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Recipes Grid -->
+<section class="recipes-preview-section scroll-reveal">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-subtitle">FROM THE KITCHEN</span>
+      <h2 class="section-title">Featured Recipes</h2>
+      <div class="section-line"></div>
+    </div>
+    
+    <div class="recipes-grid">
+      <% featuredRecipes.forEach(recipe => { %>
+        <article class="recipe-card">
+          <div class="recipe-card-image">
+            <img src="<%= recipe.images[0] %>" alt="<%= recipe.title %>">
+            <span class="recipe-category-tag"><%= recipe.category %></span>
+          </div>
+          <div class="recipe-card-content">
+            <h3 class="recipe-title-link"><a href="/recipes/<%= recipe.id %>"><%= recipe.title %></a></h3>
+            <p class="recipe-excerpt"><%= recipe.description %></p>
+            <a href="/recipes/<%= recipe.id %>" class="btn-card">VIEW RECIPE</a>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+    <div class="section-actions">
+      <a href="/recipes" class="btn-outline-sage">VIEW ALL RECIPES</a>
+    </div>
+  </div>
+</section>
+
+<!-- Dynamic Photography Showcase Section -->
+<section class="showcase-section scroll-reveal">
+  <div class="container">
+    <div class="showcase-grid">
+      <div class="showcase-item">
+        <img src="/images/sea-bass.jpg" alt="Mediterranean Sea Bass">
+        <div class="showcase-overlay">
+          <span>Pan-Seared Sea Bass</span>
+        </div>
+      </div>
+      <div class="showcase-item">
+        <img src="/images/chef-portrait.jpg" alt="Chef Nitesh Sharma in action">
+        <div class="showcase-overlay">
+          <span>Chef Nitesh Sharma</span>
+        </div>
+      </div>
+      <div class="showcase-item">
+        <img src="/images/recipe-salmon.jpg" alt="Gourmet plating salmon">
+        <div class="showcase-overlay">
+          <span>Herb Crusted Salmon</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Latest Blog Posts -->
+<section class="blog-preview-section scroll-reveal">
+  <div class="container blog-preview-container">
+    
+    <!-- Main Left Content: Blogs List -->
+    <div class="blog-preview-main">
+      <div class="section-header align-left">
+        <span class="section-subtitle">STORIES & THOUGHTS</span>
+        <h2 class="section-title">From The Blog</h2>
+        <div class="section-line"></div>
+      </div>
+      
+      <div class="posts-list-home">
+        <% latestBlogs.forEach((blog, index) => { %>
+          <% if (index === 0) { %>
+            <!-- Large Main Post -->
+            <article class="home-post-large">
+              <div class="post-large-image">
+                <img src="<%= blog.image %>" alt="<%= blog.title %>">
+              </div>
+              <div class="post-large-content">
+                <div class="post-meta">
+                  <span class="post-date"><%= new Date(blog.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></span>
+                  <span class="post-category"><%= blog.year %></span>
+                </div>
+                <h3 class="post-title"><a href="/blog/<%= blog.id %>"><%= blog.title %></a></h3>
+                <p class="post-excerpt"><%= blog.excerpt %></p>
+                <a href="/blog/<%= blog.id %>" class="btn-readmore">READ MORE</a>
+              </div>
+            </article>
+          <% } else { %>
+            <!-- Secondary Post Grid -->
+            <article class="home-post-small">
+              <div class="post-small-image">
+                <img src="<%= blog.image %>" alt="<%= blog.title %>">
+              </div>
+              <div class="post-small-content">
+                <div class="post-meta">
+                  <span class="post-date"><%= new Date(blog.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                </div>
+                <h4 class="post-title-small"><a href="/blog/<%= blog.id %>"><%= blog.title %></a></h4>
+                <p class="post-excerpt-small"><%= blog.excerpt %></p>
+                <a href="/blog/<%= blog.id %>" class="btn-readmore-small">READ MORE</a>
+              </div>
+            </article>
+          <% } %>
+        <% }) %>
+      </div>
+    </div>
+    
+    <!-- Right Content Sidebar -->
+    <aside class="blog-preview-sidebar">
+      <div class="sidebar-widget about-widget">
+        <h3 class="widget-title">The Chef</h3>
+        <div class="chef-widget-image">
+          <img src="/images/chef-portrait.jpg" alt="Chef Nitesh Sharma Portrait">
+        </div>
+        <p class="chef-widget-intro">
+          Chef Nitesh Sharma is a classically trained culinary professional specializing in modern Mediterranean menus, farm-to-table cuisine, and zero-waste kitchen practices.
+        </p>
+        <a href="/about" class="widget-link">My Story <i class="fas fa-arrow-right"></i></a>
+      </div>
+
+      <div class="sidebar-widget preview-widget">
+        <h3 class="widget-title">Sustainability</h3>
+        <p class="widget-text">
+          Explore how we minimize food waste, support regenerative organic farming, and build menus around regional agricultural biodiversity.
+        </p>
+        <a href="/sustainability" class="widget-link">Philosophy <i class="fas fa-arrow-right"></i></a>
+      </div>
+
+      <div class="sidebar-widget preview-widget">
+        <h3 class="widget-title">Chef Journey</h3>
+        <p class="widget-text">
+          Review my professional history leading and expanding Mediterranean menus for prestigious fine dining groups.
+        </p>
+        <a href="/journey" class="widget-link">View Timeline <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </aside>
+    
+  </div>
+</section>
+
+<!-- Call to Action Banner -->
+<section class="cta-section scroll-reveal">
+  <div class="container cta-container">
+    <div class="cta-card">
+      <h2>Collaborate or Book a Consultation</h2>
+      <p>Whether you want to curate a bespoke seasonal menu program, consult on kitchen operations, or discuss food sustainability projects, I would love to hear from you.</p>
+      <div class="cta-buttons">
+        <a href="/contact" class="btn-cta-primary">GET IN TOUCH</a>
+        <a href="https://wa.me/919521342251" target="_blank" class="btn-cta-whatsapp"><i class="fab fa-whatsapp"></i> MESSAGE ON WHATSAPP</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

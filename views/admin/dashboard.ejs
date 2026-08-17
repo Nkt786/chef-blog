@@ -1,0 +1,153 @@
+<%- include('../partials/admin-nav') %>
+
+<!-- Statistics Cards Grid -->
+<div class="stats-grid">
+  
+  <div class="stat-card">
+    <div class="stat-icon icon-blue"><i class="fas fa-newspaper"></i></div>
+    <div class="stat-info">
+      <h3>Blogs</h3>
+      <p class="stat-number"><%= blogCount %></p>
+      <a href="/admin/blogs" class="stat-link">Manage Blogs <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon icon-green"><i class="fas fa-utensils"></i></div>
+    <div class="stat-info">
+      <h3>Recipes</h3>
+      <p class="stat-number"><%= recipeCount %></p>
+      <a href="/admin/recipes" class="stat-link">Manage Recipes <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon icon-orange"><i class="fas fa-envelope"></i></div>
+    <div class="stat-info">
+      <h3>New Enquiries</h3>
+      <p class="stat-number"><%= unreadEnquiries %></p>
+      <a href="/admin/contacts" class="stat-link">View Contacts <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon icon-purple"><i class="fas fa-users"></i></div>
+    <div class="stat-info">
+      <h3>Subscribers</h3>
+      <p class="stat-number"><%= subscriberCount %></p>
+      <a href="/admin/newsletter" class="stat-link">View Subscribers <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+
+</div>
+
+<!-- Settings Panel -->
+<div class="settings-panel">
+  <div class="panel-header">
+    <h2><i class="fas fa-cog"></i> Website Settings</h2>
+    <p>Update site content details and security configuration</p>
+  </div>
+  <div class="panel-body">
+    <form action="/admin/settings" method="POST" class="admin-form">
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="brandName">Chef Brand Name</label>
+          <input type="text" id="brandName" name="brandName" value="<%= settings.brandName %>" required>
+        </div>
+        <div class="form-group col-6">
+          <label for="tagline">Main Concept/Tagline</label>
+          <input type="text" id="tagline" name="tagline" value="<%= settings.tagline %>" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="shortDescription">Website Short Description</label>
+        <input type="text" id="shortDescription" name="shortDescription" value="<%= settings.shortDescription %>" required>
+      </div>
+
+      <h3 style="margin: 25px 0 10px; font-size: 14px; border-bottom: 1px solid var(--admin-border-color); padding-bottom: 5px; color: var(--admin-text-main);">Page Headings & Subtitles</h3>
+
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="recipeSubtitle">Recipes Page Subtitle</label>
+          <input type="text" id="recipeSubtitle" name="recipeSubtitle" value="<%= settings.recipeSubtitle || 'From the Chef\'s Notebook' %>">
+        </div>
+        <div class="form-group col-6">
+          <label for="recipeHeading">Recipes Page Heading</label>
+          <input type="text" id="recipeHeading" name="recipeHeading" value="<%= settings.recipeHeading || 'Culinary Recipes' %>">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="blogSubtitle">Blog Page Subtitle</label>
+          <input type="text" id="blogSubtitle" name="blogSubtitle" value="<%= settings.blogSubtitle || 'Aroma of Life Stories' %>">
+        </div>
+        <div class="form-group col-6">
+          <label for="blogHeading">Blog Page Heading</label>
+          <input type="text" id="blogHeading" name="blogHeading" value="<%= settings.blogHeading || 'Chef Blog Portfolio' %>">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="journeySubtitle">Journey Page Subtitle</label>
+          <input type="text" id="journeySubtitle" name="journeySubtitle" value="<%= settings.journeySubtitle || 'My Work So Far' %>">
+        </div>
+        <div class="form-group col-6">
+          <label for="journeyHeading">Journey Page Heading</label>
+          <input type="text" id="journeyHeading" name="journeyHeading" value="<%= settings.journeyHeading || 'Chef\'s Professional Journey' %>">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="sustainabilitySubtitle">Sustainability Subtitle</label>
+          <input type="text" id="sustainabilitySubtitle" name="sustainabilitySubtitle" value="<%= settings.sustainabilitySubtitle || 'Eco-conscious Gastronomy' %>">
+        </div>
+        <div class="form-group col-6">
+          <label for="sustainabilityHeading">Sustainability Heading</label>
+          <input type="text" id="sustainabilityHeading" name="sustainabilityHeading" value="<%= settings.sustainabilityHeading || 'Sustainability Philosophy' %>">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="aboutSubtitle">About Me Subtitle</label>
+          <input type="text" id="aboutSubtitle" name="aboutSubtitle" value="<%= settings.aboutSubtitle || 'The Culinary Story' %>">
+        </div>
+        <div class="form-group col-6">
+          <label for="aboutHeading">About Me Heading</label>
+          <input type="text" id="aboutHeading" name="aboutHeading" value="<%= settings.aboutHeading || 'About Chef Nitesh' %>">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="contactSubtitle">Contact Page Subtitle</label>
+          <input type="text" id="contactSubtitle" name="contactSubtitle" value="<%= settings.contactSubtitle || 'Get In Touch' %>">
+        </div>
+        <div class="form-group col-6">
+          <label for="contactHeading">Contact Page Heading</label>
+          <input type="text" id="contactHeading" name="contactHeading" value="<%= settings.contactHeading || 'Contact Chef Nitesh' %>">
+        </div>
+      </div>
+
+      <h3 style="margin: 25px 0 10px; font-size: 14px; border-bottom: 1px solid var(--admin-border-color); padding-bottom: 5px; color: var(--admin-text-main);">Security Configuration</h3>
+
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="adminPassword">Update Password (leave blank to keep current)</label>
+          <input type="password" id="adminPassword" name="adminPassword" placeholder="••••••••">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary">SAVE SETTINGS</button>
+    </form>
+  </div>
+</div>
+
+</main>
+</div>
+</body>
+</html>

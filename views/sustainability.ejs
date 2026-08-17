@@ -1,0 +1,59 @@
+<%- include('partials/header', { title: 'Sustainability' }) %>
+
+<section class="page-title-section fade-in-up">
+  <div class="container">
+    <span class="page-subtitle"><%= settings.sustainabilitySubtitle || 'Eco-conscious Gastronomy' %></span>
+    <h1 class="page-title"><%= settings.sustainabilityHeading || 'Sustainability Philosophy' %></h1>
+    <div class="section-line"></div>
+  </div>
+</section>
+
+<section class="sustainability-page-section">
+  <div class="container">
+    
+    <!-- Introduction Section -->
+    <div class="sustainability-intro scroll-reveal">
+      <div class="sustainability-intro-content">
+        <h2>Preserving the Land and the Plate</h2>
+        <p>
+          Culinary innovation doesn't stop at taste—it must extend to the stewardship of our agricultural systems. Throughout my career leading Mediterranean kitchens, I have focused on connecting kitchens directly with the rhythms of nature. By reducing waste, sourcing regeneratively, and respecting seasons, we create dishes that are rich in stories and respect the earth.
+        </p>
+      </div>
+    </div>
+
+    <!-- Alternating Content Blocks -->
+    <div class="sustainability-blocks-list">
+      <% if (contentBlocks.length === 0) { %>
+        <div class="no-sustainability-blocks">
+          <p>Sustainability projects and philosophy articles are currently being added. Check back soon!</p>
+        </div>
+      <% } else { %>
+        <% contentBlocks.forEach((block, index) => { %>
+          <div class="sustainability-row scroll-reveal <%= index % 2 !== 0 ? 'row-reverse' : '' %>">
+            <div class="sustainability-img-box">
+              <img src="<%= block.image %>" alt="<%= block.title %>">
+            </div>
+            <div class="sustainability-text-box">
+              <h2 class="sustainability-block-title"><%= block.title %></h2>
+              <div class="sustainability-block-content entry-content">
+                <%- block.content %>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+
+    <!-- Eco Banner / Quote -->
+    <div class="eco-banner scroll-reveal">
+      <div class="eco-banner-card">
+        <i class="fas fa-leaf eco-leaf-icon"></i>
+        <p class="eco-quote">"True sustainability is zero-compromise gastronomy. It forces a chef to be more creative, more technical, and more connected to the earth."</p>
+        <span class="eco-author">— Chef Nitesh Sharma</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<%- include('partials/footer') %>

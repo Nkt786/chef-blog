@@ -1,0 +1,49 @@
+<%- include('../partials/admin-nav') %>
+
+<div class="panel-header">
+  <h2><i class="fas fa-users"></i> Newsletter Subscribers</h2>
+  <p>View and manage emails signed up for your seasonal newsletters</p>
+</div>
+
+<div class="table-container">
+  <% if (subscribers.length === 0) { %>
+    <div class="empty-state">
+      <i class="fas fa-users-slash"></i>
+      <p>No newsletter subscribers found. Form signups will appear here!</p>
+    </div>
+  <% } else { %>
+    <div class="subscriber-stats-banner">
+      <p>Total Active Subscribers: <strong><%= subscribers.length %></strong></p>
+    </div>
+    
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Subscriber Email Address</th>
+          <th>Date Subscribed</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% subscribers.forEach((sub, index) => { %>
+          <tr>
+            <td><%= index + 1 %></td>
+            <td><strong><%= sub.email %></strong></td>
+            <td><%= sub.date %></td>
+            <td class="td-actions">
+              <form action="/admin/newsletter/delete/<%= sub.id %>" method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this subscriber?');">
+                <button type="submit" class="btn-action btn-delete" title="Delete Subscriber"><i class="fas fa-trash-alt"></i> Remove</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+</main>
+</div>
+</body>
+</html>

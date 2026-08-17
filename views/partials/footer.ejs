@@ -1,0 +1,114 @@
+  <!-- Footer Section -->
+  <footer class="main-footer" id="newsletter-section">
+    <div class="container footer-container">
+      
+      <!-- Column 1: Brand Info -->
+      <div class="footer-col brand-col">
+        <h3 class="footer-title"><%= settings.brandName %></h3>
+        <p class="footer-desc"><%= settings.shortDescription %></p>
+        <p class="copyright">&copy; <%= new Date().getFullYear() %> Chef Nitesh Sharma.<br>All rights reserved.</p>
+      </div>
+      
+      <!-- Column 2: Navigation Links -->
+      <div class="footer-col links-col">
+        <h4 class="footer-section-title">Navigation</h4>
+        <ul class="footer-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/blog">Blog Portfolio</a></li>
+          <li><a href="/journey">Chef Journey</a></li>
+          <li><a href="/recipes">Recipes</a></li>
+          <li><a href="/sustainability">Sustainability</a></li>
+          <li><a href="/about">About Me</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 3: Follow Us -->
+      <div class="footer-col social-col">
+        <h4 class="footer-section-title">Connect</h4>
+        <ul class="footer-social-list">
+          <li><a href="https://wa.me/919521342251" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
+          <li><a href="https://www.linkedin.com/in/chefnitesh/" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
+          <li><a href="mailto:Niteshind84@yahoo.com"><i class="far fa-envelope"></i> Email</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 4: Newsletter -->
+      <div class="footer-col newsletter-col">
+        <h4 class="footer-section-title">Newsletter</h4>
+        <p class="newsletter-text">Join my newsletter to receive seasonal recipes, food stories, and sustainable kitchen tips.</p>
+        <form action="/newsletter" method="POST" class="newsletter-form-footer">
+          <input type="email" name="email" placeholder="Your email address" required aria-label="Newsletter Email">
+          <button type="submit" class="btn-submit-newsletter">SUBSCRIBE</button>
+        </form>
+        <div id="newsletter-message" class="newsletter-msg"></div>
+      </div>
+      
+    </div>
+  </footer>
+
+  <!-- Scroll-to-Top Button -->
+  <button class="scroll-to-top" id="scrollTopBtn" aria-label="Scroll to top">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <!-- Core JavaScript files -->
+  <script src="/js/main.js"></script>
+  <script src="/js/animations.js"></script>
+  
+  <script>
+    // Simple AJAX subscribe form handler
+    document.querySelectorAll('form[action="/newsletter"]').forEach(form => {
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const emailInput = this.querySelector('input[type="email"]');
+        const submitBtn = this.querySelector('button');
+        const msgDiv = document.getElementById('newsletter-message') || alert;
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'SENDING...';
+        
+        try {
+          const response = await fetch('/newsletter', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ email: emailInput.value })
+          });
+          
+          const result = await response.json();
+          if (response.ok) {
+            if (msgDiv === alert) {
+              alert(result.message);
+            } else {
+              msgDiv.textContent = result.message;
+              msgDiv.className = 'newsletter-msg success-msg';
+            }
+            emailInput.value = '';
+          } else {
+            throw new Error(result.error || 'Subscription failed');
+          }
+        } catch (error) {
+          if (msgDiv === alert) {
+            alert(error.message);
+          } else {
+            msgDiv.textContent = error.message;
+            msgDiv.className = 'newsletter-msg error-msg';
+          }
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'SUBSCRIBE';
+          setTimeout(() => {
+            if (msgDiv !== alert) {
+              msgDiv.className = 'newsletter-msg';
+              msgDiv.textContent = '';
+            }
+          }, 5000);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

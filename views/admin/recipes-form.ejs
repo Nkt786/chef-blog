@@ -1,0 +1,70 @@
+<%- include('../partials/admin-nav') %>
+
+<div class="panel-header">
+  <h2><%= recipe ? 'Edit Recipe' : 'Add New Recipe' %></h2>
+  <p><%= recipe ? `Editing: ${recipe.title}` : 'Introduce a new dish recipe to your portfolio' %></p>
+</div>
+
+<div class="content-panel">
+  <form action="<%= recipe ? `/admin/recipes/edit/${recipe.id}` : '/admin/recipes/add' %>" method="POST" enctype="multipart/form-data" class="admin-form">
+    
+    <div class="form-row">
+      <div class="form-group col-8">
+        <label for="title">Recipe Title *</label>
+        <input type="text" id="title" name="title" value="<%= recipe ? recipe.title : '' %>" required placeholder="e.g. Pan-Seared Sea Bass">
+      </div>
+      <div class="form-group col-4">
+        <label for="category">Recipe Category *</label>
+        <select id="category" name="category" required>
+          <option value="" disabled <%= !recipe ? 'selected' : '' %>>Select Category...</option>
+          <% ['Fish', 'Chicken', 'Beef', 'Pork', 'Vegetables', 'Salads', 'Soups'].forEach(cat => { %>
+            <option value="<%= cat %>" <%= (recipe && recipe.category === cat) ? 'selected' : '' %>><%= cat %></option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Short Description/Teaser *</label>
+      <input type="text" id="description" name="description" value="<%= recipe ? recipe.description : '' %>" required placeholder="e.g. Crisp skin fillet served over sweet Sicilian eggplant caponata.">
+    </div>
+
+    <div class="form-group">
+      <label for="ingredients">Ingredients (Enter one ingredient per line) *</label>
+      <textarea id="ingredients" name="ingredients" rows="8" required placeholder="e.g.&#10;2 Sea Bass fillets (skin-on)&#10;1 Eggplant, medium diced&#10;3 tbsp Extra virgin olive oil"><%= recipe ? recipe.ingredients.join('\n') : '' %></textarea>
+      <small class="form-help">Enter each ingredient item on a new line (do not add bullet points, they are added automatically).</small>
+    </div>
+
+    <div class="form-group">
+      <label for="method">Preparation Steps (Enter one step per line) *</label>
+      <textarea id="method" name="method" rows="8" required placeholder="e.g.&#10;Prepare the Caponata: Heat oil in a pan, cook eggplant.&#10;Sear the Bass: Heat non-stick pan, place skin-side down."><%= recipe ? recipe.method.join('\n') : '' %></textarea>
+      <small class="form-help">Enter each chronological step on a new line. The list numbers will be generated automatically.</small>
+    </div>
+
+    <div class="form-group">
+      <label for="images">Recipe Images (Up to 5 images)</label>
+      <input type="file" id="images" name="images" accept="image/*" multiple>
+      <% if (recipe && recipe.images && recipe.images.length > 0) { %>
+        <div class="form-image-preview">
+          <p>Current active images:</p>
+          <div class="images-preview-row">
+            <% recipe.images.forEach(img => { %>
+              <img src="<%= img %>" alt="Recipe step" class="preview-thumb">
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">SAVE RECIPE</button>
+      <a href="/admin/recipes" class="btn-secondary">CANCEL</a>
+    </div>
+
+  </form>
+</div>
+
+</main>
+</div>
+</body>
+</html>

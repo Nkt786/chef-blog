@@ -1,0 +1,139 @@
+<%- include('../partials/admin-nav') %>
+
+<div class="panel-header">
+  <h2><i class="fas fa-history"></i> Manage Journey Timeline</h2>
+  <p>Document your professional career milestones, culinary positions, and consultations</p>
+</div>
+
+<!-- Add Timeline Entry Form -->
+<div class="content-panel add-journey-panel">
+  <h3>Add New Journey Entry</h3>
+  <div class="panel-divider"></div>
+  <form action="/admin/journey/add" method="POST" class="admin-form">
+    <div class="form-row">
+      <div class="form-group col-2">
+        <label for="year">Year *</label>
+        <input type="text" id="year" name="year" required placeholder="e.g. 2026">
+      </div>
+      <div class="form-group col-5">
+        <label for="title">Job Title / Role *</label>
+        <input type="text" id="title" name="title" required placeholder="e.g. Executive Chef">
+      </div>
+      <div class="form-group col-5">
+        <label for="company">Company / Institution *</label>
+        <input type="text" id="company" name="company" required placeholder="e.g. Aurelia Hotel Group">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="description">Role Description / Achievements *</label>
+      <textarea id="description" name="description" rows="3" required placeholder="Outline your key operational achievements, team leadership size, and menu accomplishments..."></textarea>
+    </div>
+    <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> ADD ENTRY</button>
+  </form>
+</div>
+
+<!-- Journey Timeline Table -->
+<div class="table-container m-t-30">
+  <h3>Current Timeline Entries</h3>
+  <div class="panel-divider"></div>
+  
+  <% if (journey.length === 0) { %>
+    <div class="empty-state">
+      <p>No timeline entries found. Add your first position above!</p>
+    </div>
+  <% } else { %>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Role / Title</th>
+          <th>Company</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% journey.forEach(entry => { %>
+          <tr>
+            <td><strong><%= entry.year %></strong></td>
+            <td><%= entry.title %></td>
+            <td><%= entry.company %></td>
+            <td class="td-desc"><%= entry.description %></td>
+            <td class="td-actions">
+              <!-- Simple inline edit setup / popover or separate fields. Since we want to keep it simple, we can have a hidden inline form that shows up when edit is clicked, or simple edit triggers. Let's make a modal or simple separate edit inputs. Even simpler, we can let them edit details in text inputs directly in the row! -->
+              <form action="/admin/journey/edit/<%= entry.id %>" method="POST" class="row-edit-form">
+                <input type="hidden" name="year" value="<%= entry.year %>">
+                <input type="hidden" name="title" value="<%= entry.title %>">
+                <input type="hidden" name="company" value="<%= entry.company %>">
+                <input type="hidden" name="description" value="<%= entry.description %>">
+              </form>
+              <button type="button" class="btn-action btn-edit btn-trigger-edit" onclick="triggerJourneyEdit(this, '<%= entry.id %>')"><i class="fas fa-edit"></i></button>
+              
+              <form action="/admin/journey/delete/<%= entry.id %>" method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this journey entry?');">
+                <button type="submit" class="btn-action btn-delete"><i class="fas fa-trash-alt"></i></button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<!-- Simple Journey Edit Modal -->
+<div class="admin-modal" id="journeyEditModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Edit Journey Entry</h3>
+      <span class="modal-close" onclick="closeJourneyModal()">&times;</span>
+    </div>
+    <form id="modalEditForm" method="POST" class="admin-form">
+      <div class="form-row">
+        <div class="form-group col-3">
+          <label for="modalYear">Year</label>
+          <input type="text" id="modalYear" name="year" required>
+        </div>
+        <div class="form-group col-9">
+          <label for="modalTitle">Job Title</label>
+          <input type="text" id="modalTitle" name="title" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="modalCompany">Company</label>
+        <input type="text" id="modalCompany" name="company" required>
+      </div>
+      <div class="form-group">
+        <label for="modalDescription">Description</label>
+        <textarea id="modalDescription" name="description" rows="4" required></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">SAVE CHANGES</button>
+        <button type="button" class="btn-secondary" onclick="closeJourneyModal()">CANCEL</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function triggerJourneyEdit(button, id) {
+    const row = button.closest('tr');
+    const form = row.querySelector('.row-edit-form');
+    
+    document.getElementById('modalYear').value = form.querySelector('[name="year"]').value;
+    document.getElementById('modalTitle').value = form.querySelector('[name="title"]').value;
+    document.getElementById('modalCompany').value = form.querySelector('[name="company"]').value;
+    document.getElementById('modalDescription').value = form.querySelector('[name="description"]').value;
+    
+    document.getElementById('modalEditForm').action = '/admin/journey/edit/' + id;
+    document.getElementById('journeyEditModal').classList.add('active');
+  }
+
+  function closeJourneyModal() {
+    document.getElementById('journeyEditModal').classList.remove('active');
+  }
+</script>
+
+</main>
+</div>
+</body>
+</html>

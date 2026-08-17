@@ -1,0 +1,88 @@
+<%- include('partials/header', { title: 'Blog Portfolio' }) %>
+
+<section class="page-title-section fade-in-up">
+  <div class="container">
+    <span class="page-subtitle"><%= settings.blogSubtitle || 'Aroma of Life Stories' %></span>
+    <h1 class="page-title"><%= settings.blogHeading || 'Chef Blog Portfolio' %></h1>
+    <div class="section-line"></div>
+  </div>
+</section>
+
+<section class="blog-page-section">
+  <div class="container blog-page-container">
+    
+    <!-- Main Blogs Column -->
+    <main class="blog-main-content">
+      <% if (years.length === 0) { %>
+        <div class="no-posts">
+          <p>No blog posts published yet. Check back soon!</p>
+        </div>
+      <% } else { %>
+        <% years.forEach(year => { %>
+          <div class="year-group scroll-reveal" id="year-<%= year %>">
+            <h2 class="year-header"><%= year %></h2>
+            <div class="blog-year-grid">
+              <% blogsByYear[year].forEach(blog => { %>
+                <article class="blog-card-full">
+                  <div class="blog-card-img">
+                    <img src="<%= blog.image %>" alt="<%= blog.title %>">
+                  </div>
+                  <div class="blog-card-body">
+                    <div class="blog-card-meta">
+                      <span class="blog-card-date">
+                        <i class="far fa-calendar-alt"></i> <%= new Date(blog.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %>
+                      </span>
+                    </div>
+                    <h3 class="blog-card-title"><a href="/blog/<%= blog.id %>"><%= blog.title %></a></h3>
+                    <p class="blog-card-excerpt"><%= blog.excerpt %></p>
+                    <a href="/blog/<%= blog.id %>" class="btn-card-readmore">READ STORY</a>
+                  </div>
+                </article>
+              <% }) %>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </main>
+    
+    <!-- Blog Sidebar -->
+    <aside class="blog-sidebar">
+      
+      <!-- Year Quick Links -->
+      <div class="sidebar-widget">
+        <h3 class="widget-title">Archive Years</h3>
+        <ul class="sidebar-years-list">
+          <% years.forEach(year => { %>
+            <li><a href="#year-<%= year %>"><i class="fas fa-chevron-right"></i> <%= year %> Posts (<%= blogsByYear[year].length %>)</a></li>
+          <% }) %>
+        </ul>
+      </div>
+
+      <!-- About the Author -->
+      <div class="sidebar-widget about-widget">
+        <h3 class="widget-title">The Chef</h3>
+        <div class="chef-widget-image">
+          <img src="/images/chef-portrait.jpg" alt="Chef Nitesh Sharma Portrait">
+        </div>
+        <p class="chef-widget-intro">
+          Chef Nitesh Sharma is a classically trained culinary professional specializing in modern Mediterranean menus, farm-to-table cuisine, and zero-waste kitchen practices.
+        </p>
+        <a href="/about" class="widget-link">My Story <i class="fas fa-arrow-right"></i></a>
+      </div>
+
+      <!-- Follow Socials -->
+      <div class="sidebar-widget">
+        <h3 class="widget-title">Connect</h3>
+        <div class="sidebar-socials">
+          <a href="https://wa.me/919521342251" target="_blank" class="social-circle whatsapp"><i class="fab fa-whatsapp"></i></a>
+          <a href="https://www.linkedin.com/in/chefnitesh/" target="_blank" class="social-circle linkedin"><i class="fab fa-linkedin-in"></i></a>
+          <a href="mailto:Niteshind84@yahoo.com" class="social-circle email"><i class="far fa-envelope"></i></a>
+        </div>
+      </div>
+      
+    </aside>
+
+  </div>
+</section>
+
+<%- include('partials/footer') %>

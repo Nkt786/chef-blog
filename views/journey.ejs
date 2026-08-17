@@ -1,0 +1,64 @@
+<%- include('partials/header', { title: 'Journey' }) %>
+
+<section class="page-title-section fade-in-up">
+  <div class="container">
+    <span class="page-subtitle"><%= settings.journeySubtitle || 'My Work So Far' %></span>
+    <h1 class="page-title"><%= settings.journeyHeading || 'Chef\'s Professional Journey' %></h1>
+    <div class="section-line"></div>
+  </div>
+</section>
+
+<section class="journey-page-section">
+  <div class="container journey-container">
+    
+    <div class="journey-intro scroll-reveal">
+      <p class="journey-intro-text">
+        With over 15 years of active professional kitchen experience, my path has focused on elevating Mediterranean culinary programs, structuring high-volume operations, and developing farm-to-table supply chains. Here is a timeline of my work so far.
+      </p>
+    </div>
+
+    <!-- Timeline Wrapper -->
+    <div class="timeline">
+      <div class="timeline-line"></div>
+      
+      <% if (years.length === 0) { %>
+        <div class="no-timeline-entries">
+          <p>Timeline is being populated. Please check back later!</p>
+        </div>
+      <% } else { %>
+        <% years.forEach((year, index) => { %>
+          <div class="timeline-year-block scroll-reveal">
+            <div class="timeline-year-label">
+              <span><%= year %></span>
+            </div>
+            
+            <div class="timeline-entries-container">
+              <% journeyByYear[year].forEach(entry => { %>
+                <div class="timeline-card">
+                  <div class="timeline-card-header">
+                    <span class="timeline-company"><%= entry.company %></span>
+                    <h3 class="timeline-title"><%= entry.title %></h3>
+                  </div>
+                  <div class="timeline-card-body">
+                    <p><%= entry.description %></p>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+      
+    </div>
+
+    <!-- Call to Action -->
+    <div class="journey-cta scroll-reveal">
+      <h3>Interested in a Culinary Consultation?</h3>
+      <p>I collaborate with hotels, fine dining startups, and restaurants to optimize menus, establish farm connections, and train staff.</p>
+      <a href="/contact" class="btn-hero">CONNECT WITH ME</a>
+    </div>
+
+  </div>
+</section>
+
+<%- include('partials/footer') %>
