@@ -77,7 +77,10 @@ function checkAuth(req, res, next) {
 
 // Maintenance Mode Middleware
 app.use((req, res, next) => {
-  if (process.env.MAINTENANCE_MODE === 'true') {
+  const isMaintenance = process.env.MAINTENANCE_MODE === 'true';
+  const isAdmin = req.session && req.session.isAdmin;
+
+  if (isMaintenance && !isAdmin) {
     // Exclude admin panel and static assets so they don't break
     const isAssetOrAdmin = 
       req.path.startsWith('/admin') || 
