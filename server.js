@@ -75,6 +75,26 @@ function checkAuth(req, res, next) {
   res.redirect('/admin/login');
 }
 
+// Maintenance Mode Middleware
+app.use((req, res, next) => {
+  if (process.env.MAINTENANCE_MODE === 'true') {
+    // Exclude admin panel and static assets so they don't break
+    const isAssetOrAdmin = 
+      req.path.startsWith('/admin') || 
+      req.path.startsWith('/uploads') || 
+      req.path.startsWith('/css') || 
+      req.path.startsWith('/js') || 
+      req.path.startsWith('/images') ||
+      req.path.startsWith('/favicon.ico');
+      
+    if (!isAssetOrAdmin) {
+      res.status(503);
+      return res.render('maintenance');
+    }
+  }
+  next();
+});
+
 /* ========================================================
    PUBLIC PAGES ROUTES
    ======================================================== */
