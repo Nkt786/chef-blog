@@ -48,7 +48,7 @@
     <p>Update site content details and security configuration</p>
   </div>
   <div class="panel-body">
-    <form action="/admin/settings" method="POST" class="admin-form">
+    <form action="/admin/settings" method="POST" enctype="multipart/form-data" class="admin-form">
       <div class="form-row">
         <div class="form-group col-6">
           <label for="brandName">Chef Brand Name</label>
@@ -63,6 +63,20 @@
       <div class="form-group">
         <label for="shortDescription">Website Short Description</label>
         <input type="text" id="shortDescription" name="shortDescription" value="<%= settings.shortDescription %>" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="chefImage">Chef Profile Image (Portrait)</label>
+          <input type="file" id="chefImage" name="chefImage" accept="image/*">
+          <small class="form-help">Upload a portrait image of the chef (will replace the default portrait on all pages).</small>
+        </div>
+        <div class="form-group col-6">
+          <label>Current Profile Image</label>
+          <div style="margin-top: 5px;">
+            <img src="<%= settings.chefImage || '/images/chef-portrait.jpg' %>" alt="Chef Portrait Preview" style="height: 70px; border-radius: 8px; border: 1px solid var(--admin-border-color); object-fit: cover;">
+          </div>
+        </div>
       </div>
 
       <h3 style="margin: 25px 0 10px; font-size: 14px; border-bottom: 1px solid var(--admin-border-color); padding-bottom: 5px; color: var(--admin-text-main);">Page Headings & Subtitles</h3>

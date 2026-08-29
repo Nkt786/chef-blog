@@ -635,7 +635,7 @@ app.post('/admin/newsletter/delete/:id', checkAuth, async (req, res) => {
 
 
 // --- ADMIN: SETTINGS ---
-app.post('/admin/settings', checkAuth, async (req, res) => {
+app.post('/admin/settings', checkAuth, upload.single('chefImage'), async (req, res) => {
   const { 
     brandName, shortDescription, tagline, adminPassword,
     recipeHeading, recipeSubtitle,
@@ -655,6 +655,10 @@ app.post('/admin/settings', checkAuth, async (req, res) => {
     aboutHeading, aboutSubtitle,
     contactHeading, contactSubtitle
   };
+
+  if (req.file) {
+    updateData.chefImage = `/uploads/${req.file.filename}`;
+  }
 
   if (adminPassword && adminPassword.trim().length > 0) {
     updateData.adminPassword = adminPassword;
