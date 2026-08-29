@@ -57,6 +57,37 @@
   </form>
 </div>
 
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+<script>
+  ClassicEditor
+    .create(document.querySelector('#content'), {
+      toolbar: [
+        'heading', '|',
+        'bold', 'italic', 'link', '|',
+        'bulletedList', 'numberedList', '|',
+        'blockQuote', 'undo', 'redo'
+      ]
+    })
+    .catch(error => {
+      console.error(error);
+    });
+</script>
+<style>
+  /* Fix CKEditor look and size in the admin console */
+  .ck-editor__editable_inline {
+    min-height: 350px;
+    background-color: #fff !important;
+    color: #262626 !important;
+  }
+  .ck.ck-editor {
+    width: 100%;
+  }
+  .ck.ck-toolbar {
+    background-color: #fafafa !important;
+    border-color: #d9d9d9 !important;
+  }
+</style>
+
 </main>
 </div>
 </body>
