@@ -210,7 +210,8 @@ const SettingSchema = new mongoose.Schema({
   adminPassword: { type: String, default: 'chefadmin2026' },
   brandName: { type: String, default: 'Chef Nitesh Sharma' },
   shortDescription: { type: String, default: 'Aroma of Life by Chef Nitesh Sharma' },
-  tagline: { type: String, default: 'Crafting Stories on a Plate' }
+  tagline: { type: String, default: 'Crafting Stories on a Plate' },
+  chefImage: { type: String }
 }, { strict: false });
 
 const BlogSchema = new mongoose.Schema({
@@ -437,16 +438,12 @@ module.exports = {
   async updateSettings(settings) {
     const Model = models['settings'];
     try {
-      let settingsDoc = await Model.findOne({});
-      if (!settingsDoc) {
-        settingsDoc = new Model(settings);
-      } else {
-        Object.assign(settingsDoc, settings);
-      }
-      await settingsDoc.save();
-      
-      const docObj = settingsDoc.toObject();
-      const { _id, __v, ...rest } = docObj;
+      const doc = await Model.findOneAndUpdate(
+        {},
+        { $set: settings },
+        { new: true, upsert: true, lean: true }
+      );
+      const { _id, __v, ...rest } = doc;
       return rest;
     } catch (err) {
       console.error('Error in db.updateSettings():', err.message);
