@@ -1,7 +1,4 @@
-const fs = require('fs').promises;
-const path = require('path');
-
-const DB_FILE = path.join(__dirname, 'data.json');
+const mongoose = require('mongoose');
 
 // Default initial database content
 const DEFAULT_DATA = {
@@ -69,7 +66,8 @@ const DEFAULT_DATA = {
         'To Serve: Spoon a generous portion of warm caponata onto a plate. Top with the sea bass fillet skin-side up. Garnish with a drizzle of extra virgin olive oil.'
       ],
       images: ['/images/sea-bass.jpg'],
-      date: '2026-08-12'
+      date: '2026-08-12',
+      type: 'Non-Veg'
     },
     {
       id: 'r2',
@@ -94,7 +92,8 @@ const DEFAULT_DATA = {
         'Rest for 5 minutes before serving with pan drippings.'
       ],
       images: ['/images/truffle-chicken.jpg'],
-      date: '2026-08-11'
+      date: '2026-08-11',
+      type: 'Non-Veg'
     },
     {
       id: 'r3',
@@ -120,7 +119,8 @@ const DEFAULT_DATA = {
         'Drizzle vinaigrette over the salad. Garnish with fennel fronds and microgreens.'
       ],
       images: ['/images/beet-salad.jpg'],
-      date: '2026-07-28'
+      date: '2026-07-28',
+      type: 'Veg'
     }
   ],
   journey: [
@@ -186,117 +186,271 @@ const DEFAULT_DATA = {
   ]
 };
 
-let cachedData = null;
+// Connect to MongoDB Atlas
+const mongoURI = process.env.MONGODB_URI;
 
-// Read database from file (uses cache if loaded)
-async function readDb() {
-  if (cachedData) return cachedData;
-  try {
-    const data = await fs.readFile(DB_FILE, 'utf8');
-    cachedData = JSON.parse(data);
-    
-    // Safety check: Backfill categories if missing in existing data.json
-    if (!cachedData.categories) {
-      cachedData.categories = [
-        { id: 'cat1', name: 'Fish' },
-        { id: 'cat2', name: 'Chicken' },
-        { id: 'cat3', name: 'Beef' },
-        { id: 'cat4', name: 'Pork' },
-        { id: 'cat5', name: 'Vegetables' },
-        { id: 'cat6', name: 'Salads' },
-        { id: 'cat7', name: 'Soups' }
-      ];
-      await writeDb(cachedData);
-    }
-    
-    return cachedData;
-  } catch (error) {
-    // If file doesn't exist, create it with default data
-    await writeDb(DEFAULT_DATA);
-    cachedData = DEFAULT_DATA;
-    return cachedData;
-  }
+if (!mongoURI) {
+  console.error("FATAL ERROR: MONGODB_URI is not defined in the environment variables (.env file).");
+  process.exit(1);
 }
 
-// Write database to file
-async function writeDb(data) {
-  cachedData = data;
-  await fs.writeFile(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
+// Set mongoose connection options
+mongoose.connect(mongoURI)
+  .then(() => {
+    console.log('Connected to MongoDB Atlas successfully.');
+    // Seed initial data if Settings is empty and no local migration is running
+    initializeDbSeed();
+  })
+  .catch(err => {
+    console.error('MongoDB Connection Error:', err.message);
+  });
+
+// Schema Definitions
+const SettingSchema = new mongoose.Schema({
+  adminPassword: { type: String, default: 'chefadmin2026' },
+  brandName: { type: String, default: 'Chef Nitesh Sharma' },
+  shortDescription: { type: String, default: 'Aroma of Life by Chef Nitesh Sharma' },
+  tagline: { type: String, default: 'Crafting Stories on a Plate' }
+}, { strict: false });
+
+const BlogSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  title: String,
+  excerpt: String,
+  content: String,
+  image: String,
+  date: String,
+  year: String,
+  published: { type: Boolean, default: true }
+});
+
+const RecipeSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  title: String,
+  description: String,
+  category: String,
+  ingredients: [String],
+  method: [String],
+  images: [String],
+  date: String,
+  type: { type: String, default: 'Veg' }
+});
+
+const JourneySchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  year: String,
+  title: String,
+  description: String,
+  company: String,
+  date: String
+});
+
+const SustainabilitySchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  title: String,
+  content: String,
+  image: String,
+  date: String
+});
+
+const ContactSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  name: String,
+  email: String,
+  subject: String,
+  message: String,
+  date: String
+}, { strict: false });
+
+const SubscriberSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  email: String,
+  date: String
+});
+
+const CategorySchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  name: String
+});
+
+// Compile Models
+const models = {
+  settings: mongoose.model('Setting', SettingSchema),
+  blogs: mongoose.model('Blog', BlogSchema),
+  recipes: mongoose.model('Recipe', RecipeSchema),
+  journey: mongoose.model('Journey', JourneySchema),
+  sustainability: mongoose.model('Sustainability', SustainabilitySchema),
+  contacts: mongoose.model('Contact', ContactSchema),
+  subscribers: mongoose.model('Subscriber', SubscriberSchema),
+  categories: mongoose.model('Category', CategorySchema)
+};
+
+// Seed database with default data if empty
+async function initializeDbSeed() {
+  try {
+    const settingsCount = await models.settings.countDocuments();
+    if (settingsCount === 0) {
+      console.log('Database is empty. Seeding default data...');
+      
+      // Save settings
+      await new models.settings(DEFAULT_DATA.settings).save();
+      
+      // Seed categories
+      for (const item of DEFAULT_DATA.categories) {
+        await new models.categories(item).save();
+      }
+      
+      // Seed blogs
+      for (const item of DEFAULT_DATA.blogs) {
+        await new models.blogs(item).save();
+      }
+      
+      // Seed recipes
+      for (const item of DEFAULT_DATA.recipes) {
+        await new models.recipes(item).save();
+      }
+      
+      // Seed journey
+      for (const item of DEFAULT_DATA.journey) {
+        await new models.journey(item).save();
+      }
+      
+      // Seed sustainability
+      for (const item of DEFAULT_DATA.sustainability) {
+        await new models.sustainability(item).save();
+      }
+      
+      console.log('Default data seeded successfully.');
+    }
+  } catch (err) {
+    console.error('Error during default database seeding:', err.message);
+  }
 }
 
 module.exports = {
   // Get all items in a collection
   async get(collection) {
-    const db = await readDb();
-    return db[collection] || [];
+    const Model = models[collection];
+    if (!Model) return [];
+    try {
+      const docs = await Model.find({}).lean();
+      return docs.map(doc => {
+        const { _id, __v, ...rest } = doc;
+        return rest;
+      });
+    } catch (err) {
+      console.error(`Error in db.get(${collection}):`, err.message);
+      return [];
+    }
   },
 
   // Get item by ID
   async getById(collection, id) {
-    const items = await this.get(collection);
-    return items.find(item => item.id === id);
+    const Model = models[collection];
+    if (!Model) return null;
+    try {
+      const doc = await Model.findOne({ id }).lean();
+      if (!doc) return null;
+      const { _id, __v, ...rest } = doc;
+      return rest;
+    } catch (err) {
+      console.error(`Error in db.getById(${collection}, ${id}):`, err.message);
+      return null;
+    }
   },
 
   // Insert a new item
   async insert(collection, item) {
-    const db = await readDb();
-    if (!db[collection]) db[collection] = [];
-    
-    // Generate simple unique ID
-    const randomId = Math.random().toString(36).substring(2, 9);
-    const newItem = {
-      id: `${collection[0]}${randomId}`,
-      date: new Date().toISOString().split('T')[0],
-      ...item
-    };
-    
-    db[collection].push(newItem);
-    await writeDb(db);
-    return newItem;
+    const Model = models[collection];
+    if (!Model) return null;
+    try {
+      // Generate simple unique ID
+      const randomId = Math.random().toString(36).substring(2, 9);
+      const newItem = {
+        id: `${collection[0]}${randomId}`,
+        date: new Date().toISOString().split('T')[0],
+        ...item
+      };
+
+      const doc = new Model(newItem);
+      await doc.save();
+      return newItem;
+    } catch (err) {
+      console.error(`Error in db.insert(${collection}):`, err.message);
+      return null;
+    }
   },
 
   // Update an existing item
   async update(collection, id, updatedFields) {
-    const db = await readDb();
-    if (!db[collection]) return null;
-    
-    const index = db[collection].findIndex(item => item.id === id);
-    if (index === -1) return null;
-    
-    db[collection][index] = {
-      ...db[collection][index],
-      ...updatedFields
-    };
-    
-    await writeDb(db);
-    return db[collection][index];
+    const Model = models[collection];
+    if (!Model) return null;
+    try {
+      const doc = await Model.findOneAndUpdate(
+        { id },
+        { $set: updatedFields },
+        { new: true }
+      ).lean();
+      
+      if (!doc) return null;
+      const { _id, __v, ...rest } = doc;
+      return rest;
+    } catch (err) {
+      console.error(`Error in db.update(${collection}, ${id}):`, err.message);
+      return null;
+    }
   },
 
   // Delete an item
   async delete(collection, id) {
-    const db = await readDb();
-    if (!db[collection]) return false;
-    
-    const lengthBefore = db[collection].length;
-    db[collection] = db[collection].filter(item => item.id !== id);
-    
-    if (db[collection].length < lengthBefore) {
-      await writeDb(db);
-      return true;
+    const Model = models[collection];
+    if (!Model) return false;
+    try {
+      const result = await Model.deleteOne({ id });
+      return result.deletedCount > 0;
+    } catch (err) {
+      console.error(`Error in db.delete(${collection}, ${id}):`, err.message);
+      return false;
     }
-    return false;
   },
 
   // Settings helpers
   async getSettings() {
-    const db = await readDb();
-    return db.settings;
+    const Model = models['settings'];
+    try {
+      let settingsDoc = await Model.findOne({}).lean();
+      if (!settingsDoc) {
+        // Fallback if not seeded yet
+        const defaultDoc = { ...DEFAULT_DATA.settings };
+        const doc = new Model(defaultDoc);
+        await doc.save();
+        return defaultDoc;
+      }
+      const { _id, __v, ...rest } = settingsDoc;
+      return rest;
+    } catch (err) {
+      console.error('Error in db.getSettings():', err.message);
+      return DEFAULT_DATA.settings;
+    }
   },
 
   async updateSettings(settings) {
-    const db = await readDb();
-    db.settings = { ...db.settings, ...settings };
-    await writeDb(db);
-    return db.settings;
+    const Model = models['settings'];
+    try {
+      let settingsDoc = await Model.findOne({});
+      if (!settingsDoc) {
+        settingsDoc = new Model(settings);
+      } else {
+        Object.assign(settingsDoc, settings);
+      }
+      await settingsDoc.save();
+      
+      const docObj = settingsDoc.toObject();
+      const { _id, __v, ...rest } = docObj;
+      return rest;
+    } catch (err) {
+      console.error('Error in db.updateSettings():', err.message);
+      return null;
+    }
   }
 };
