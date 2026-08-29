@@ -19,24 +19,24 @@
       </div>
       
       <div class="about-text-box">
-        <span class="chef-title-tag">Classically Trained | over 15 Years Experience</span>
-        <h2>"Cooking is an art form driven by passion and executed with precision."</h2>
+        <span class="chef-title-tag"><%= settings.aboutTitleTag || 'Classically Trained | over 15 Years Experience' %></span>
+        <h2><%= settings.aboutQuote || '"Cooking is an art form driven by passion and executed with precision."' %></h2>
         
         <p class="bio-paragraph highlight-paragraph">
-          Chef Nitesh Sharma is a classically trained culinary professional with over 15 years of experience leading and elevating high-volume Mediterranean kitchens. For him, cooking is an art form driven by passion and executed with precision.
+          <%= settings.aboutHighlightText || 'Chef Nitesh Sharma is a classically trained culinary professional with over 15 years of experience leading and elevating high-volume Mediterranean kitchens. For him, cooking is an art form driven by passion and executed with precision.' %>
         </p>
         
         <p class="bio-paragraph">
-          Throughout his career, his vision has extended beyond crafting exquisite dishes. He focuses on orchestrating the complete guest journey, blending traditional Mediterranean flavors with modern culinary techniques and creating innovative, seasonal programs.
+          <%= settings.aboutBioParagraph1 || 'Throughout his career, his vision has extended beyond crafting exquisite dishes. He focuses on orchestrating the complete guest journey, blending traditional Mediterranean flavors with modern culinary techniques and creating innovative, seasonal programs.' %>
         </p>
 
         <p class="bio-paragraph">
-          From direct partnerships with local biodiverse farms to curating zero-waste kitchen workflows, Chef Nitesh believes that chef leadership is essential in shaping sustainable eating cultures.
+          <%= settings.aboutBioParagraph2 || 'From direct partnerships with local biodiverse farms to curating zero-waste kitchen workflows, Chef Nitesh believes that chef leadership is essential in shaping sustainable eating cultures.' %>
         </p>
         
         <div class="about-signature-container">
-          <p class="sig-name">Nitesh Sharma</p>
-          <p class="sig-title">Executive Chef & Culinary Consultant</p>
+          <p class="sig-name"><%= settings.aboutSignatureName || 'Nitesh Sharma' %></p>
+          <p class="sig-title"><%= settings.aboutSignatureTitle || 'Executive Chef & Culinary Consultant' %></p>
         </div>
       </div>
     </div>

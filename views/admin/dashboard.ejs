@@ -147,6 +147,69 @@
         </div>
       </div>
 
+      <!-- About Me Settings -->
+      <h3 style="margin: 25px 0 10px; font-size: 14px; border-bottom: 1px solid var(--admin-border-color); padding-bottom: 5px; color: var(--admin-text-main);">About Me Details</h3>
+      
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="aboutTitleTag">About Page Title Tag</label>
+          <input type="text" id="aboutTitleTag" name="aboutTitleTag" value="<%= settings.aboutTitleTag || 'Classically Trained | over 15 Years Experience' %>">
+        </div>
+        <div class="form-group col-6">
+          <label for="aboutQuote">About Page Quote</label>
+          <input type="text" id="aboutQuote" name="aboutQuote" value="<%= settings.aboutQuote || '\"Cooking is an art form driven by passion and executed with precision.\"' %>">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="aboutHighlightText">About Page Highlighted Bio Text</label>
+        <textarea id="aboutHighlightText" name="aboutHighlightText" rows="3" style="width:100%; padding:10px; border-radius:4px; border:1px solid var(--admin-border-color); background:var(--admin-bg-dark); color:var(--admin-text-main); font-family:inherit;"><%= settings.aboutHighlightText || '' %></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="aboutBioParagraph1">Bio Paragraph 1</label>
+          <textarea id="aboutBioParagraph1" name="aboutBioParagraph1" rows="5" style="width:100%; padding:10px; border-radius:4px; border:1px solid var(--admin-border-color); background:var(--admin-bg-dark); color:var(--admin-text-main); font-family:inherit;"><%= settings.aboutBioParagraph1 || '' %></textarea>
+        </div>
+        <div class="form-group col-6">
+          <label for="aboutBioParagraph2">Bio Paragraph 2</label>
+          <textarea id="aboutBioParagraph2" name="aboutBioParagraph2" rows="5" style="width:100%; padding:10px; border-radius:4px; border:1px solid var(--admin-border-color); background:var(--admin-bg-dark); color:var(--admin-text-main); font-family:inherit;"><%= settings.aboutBioParagraph2 || '' %></textarea>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="aboutSignatureName">Signature Name</label>
+          <input type="text" id="aboutSignatureName" name="aboutSignatureName" value="<%= settings.aboutSignatureName || 'Nitesh Sharma' %>">
+        </div>
+        <div class="form-group col-6">
+          <label for="aboutSignatureTitle">Signature Title</label>
+          <input type="text" id="aboutSignatureTitle" name="aboutSignatureTitle" value="<%= settings.aboutSignatureTitle || 'Executive Chef & Culinary Consultant' %>">
+        </div>
+      </div>
+
+      <!-- Contact Details Settings -->
+      <h3 style="margin: 25px 0 10px; font-size: 14px; border-bottom: 1px solid var(--admin-border-color); padding-bottom: 5px; color: var(--admin-text-main);">Contact Me Details</h3>
+      
+      <div class="form-row">
+        <div class="form-group col-3">
+          <label for="contactPhone">Phone Number</label>
+          <input type="text" id="contactPhone" name="contactPhone" value="<%= settings.contactPhone || '+91-9521342251' %>">
+        </div>
+        <div class="form-group col-3">
+          <label for="contactWhatsapp">WhatsApp Number</label>
+          <input type="text" id="contactWhatsapp" name="contactWhatsapp" value="<%= settings.contactWhatsapp || '+91-9521342251' %>">
+        </div>
+        <div class="form-group col-3">
+          <label for="contactEmail">Contact Email</label>
+          <input type="email" id="contactEmail" name="contactEmail" value="<%= settings.contactEmail || 'Niteshind84@yahoo.com' %>">
+        </div>
+        <div class="form-group col-3">
+          <label for="contactLinkedin">LinkedIn Username</label>
+          <input type="text" id="contactLinkedin" name="contactLinkedin" value="<%= settings.contactLinkedin || 'chefnitesh' %>">
+        </div>
+      </div>
+
       <h3 style="margin: 25px 0 10px; font-size: 14px; border-bottom: 1px solid var(--admin-border-color); padding-bottom: 5px; color: var(--admin-text-main);">Security Configuration</h3>
 
       <div class="form-row">

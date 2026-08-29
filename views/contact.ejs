@@ -21,41 +21,41 @@
       <div class="contact-cards-grid">
         
         <!-- WhatsApp -->
-        <a href="https://wa.me/919521342251" target="_blank" class="contact-detail-card">
+        <a href="https://wa.me/<%= (settings.contactWhatsapp || '+919521342251').replace(/[^0-9]/g, '') %>" target="_blank" class="contact-detail-card">
           <div class="card-icon whatsapp-color"><i class="fab fa-whatsapp"></i></div>
           <div class="card-details">
             <h3>WhatsApp</h3>
-            <p>+91-9521342251</p>
+            <p><%= settings.contactWhatsapp || '+91-9521342251' %></p>
             <span class="card-cta">Message Now <i class="fas fa-chevron-right"></i></span>
           </div>
         </a>
 
         <!-- Phone -->
-        <a href="tel:+919521342251" class="contact-detail-card">
+        <a href="tel:<%= (settings.contactPhone || '+919521342251').replace(/[^0-9+]/g, '') %>" class="contact-detail-card">
           <div class="card-icon phone-color"><i class="fas fa-phone-alt"></i></div>
           <div class="card-details">
             <h3>Call Me</h3>
-            <p>+91-9521342251</p>
+            <p><%= settings.contactPhone || '+91-9521342251' %></p>
             <span class="card-cta">Call Now <i class="fas fa-chevron-right"></i></span>
           </div>
         </a>
 
         <!-- Email -->
-        <a href="mailto:Niteshind84@yahoo.com" class="contact-detail-card">
+        <a href="mailto:<%= settings.contactEmail || 'Niteshind84@yahoo.com' %>" class="contact-detail-card">
           <div class="card-icon email-color"><i class="far fa-envelope"></i></div>
           <div class="card-details">
             <h3>Email</h3>
-            <p>Niteshind84@yahoo.com</p>
+            <p><%= settings.contactEmail || 'Niteshind84@yahoo.com' %></p>
             <span class="card-cta">Send Email <i class="fas fa-chevron-right"></i></span>
           </div>
         </a>
 
         <!-- LinkedIn -->
-        <a href="https://www.linkedin.com/in/chefnitesh/" target="_blank" class="contact-detail-card">
+        <a href="https://www.linkedin.com/in/<%= settings.contactLinkedin || 'chefnitesh' %>/" target="_blank" class="contact-detail-card">
           <div class="card-icon linkedin-color"><i class="fab fa-linkedin-in"></i></div>
           <div class="card-details">
             <h3>LinkedIn</h3>
-            <p>chefnitesh</p>
+            <p><%= settings.contactLinkedin || 'chefnitesh' %></p>
             <span class="card-cta">View Profile <i class="fas fa-chevron-right"></i></span>
           </div>
         </a>

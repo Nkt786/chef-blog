@@ -6,7 +6,18 @@ const DEFAULT_DATA = {
     adminPassword: 'chefadmin2026',
     brandName: 'Chef Nitesh Sharma',
     shortDescription: 'Aroma of Life by Chef Nitesh Sharma',
-    tagline: 'Crafting Stories on a Plate'
+    tagline: 'Crafting Stories on a Plate',
+    aboutTitleTag: 'Classically Trained | over 15 Years Experience',
+    aboutQuote: '"Cooking is an art form driven by passion and executed with precision."',
+    aboutHighlightText: 'Chef Nitesh Sharma is a classically trained culinary professional with over 15 years of experience leading and elevating high-volume Mediterranean kitchens. For him, cooking is an art form driven by passion and executed with precision.',
+    aboutBioParagraph1: 'Throughout his career, his vision has extended beyond crafting exquisite dishes. He focuses on orchestrating the complete guest journey, blending traditional Mediterranean flavors with modern culinary techniques and creating innovative, seasonal programs.',
+    aboutBioParagraph2: 'From direct partnerships with local biodiverse farms to curating zero-waste kitchen workflows, Chef Nitesh believes that chef leadership is essential in shaping sustainable eating cultures.',
+    aboutSignatureName: 'Nitesh Sharma',
+    aboutSignatureTitle: 'Executive Chef & Culinary Consultant',
+    contactPhone: '+91-9521342251',
+    contactWhatsapp: '+91-9521342251',
+    contactEmail: 'Niteshind84@yahoo.com',
+    contactLinkedin: 'chefnitesh'
   },
   blogs: [
     {
@@ -211,7 +222,20 @@ const SettingSchema = new mongoose.Schema({
   brandName: { type: String, default: 'Chef Nitesh Sharma' },
   shortDescription: { type: String, default: 'Aroma of Life by Chef Nitesh Sharma' },
   tagline: { type: String, default: 'Crafting Stories on a Plate' },
-  chefImage: { type: String }
+  chefImage: { type: String },
+  
+  aboutTitleTag: { type: String, default: 'Classically Trained | over 15 Years Experience' },
+  aboutQuote: { type: String, default: '"Cooking is an art form driven by passion and executed with precision."' },
+  aboutHighlightText: { type: String, default: 'Chef Nitesh Sharma is a classically trained culinary professional with over 15 years of experience leading and elevating high-volume Mediterranean kitchens. For him, cooking is an art form driven by passion and executed with precision.' },
+  aboutBioParagraph1: { type: String, default: 'Throughout his career, his vision has extended beyond crafting exquisite dishes. He focuses on orchestrating the complete guest journey, blending traditional Mediterranean flavors with modern culinary techniques and creating innovative, seasonal programs.' },
+  aboutBioParagraph2: { type: String, default: 'From direct partnerships with local biodiverse farms to curating zero-waste kitchen workflows, Chef Nitesh believes that chef leadership is essential in shaping sustainable eating cultures.' },
+  aboutSignatureName: { type: String, default: 'Nitesh Sharma' },
+  aboutSignatureTitle: { type: String, default: 'Executive Chef & Culinary Consultant' },
+
+  contactPhone: { type: String, default: '+91-9521342251' },
+  contactWhatsapp: { type: String, default: '+91-9521342251' },
+  contactEmail: { type: String, default: 'Niteshind84@yahoo.com' },
+  contactLinkedin: { type: String, default: 'chefnitesh' }
 }, { strict: false });
 
 const BlogSchema = new mongoose.Schema({

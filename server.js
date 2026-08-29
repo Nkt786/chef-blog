@@ -643,7 +643,11 @@ app.post('/admin/settings', checkAuth, upload.single('chefImage'), async (req, r
     journeyHeading, journeySubtitle,
     sustainabilityHeading, sustainabilitySubtitle,
     aboutHeading, aboutSubtitle,
-    contactHeading, contactSubtitle
+    contactHeading, contactSubtitle,
+    aboutTitleTag, aboutQuote, aboutHighlightText,
+    aboutBioParagraph1, aboutBioParagraph2,
+    aboutSignatureName, aboutSignatureTitle,
+    contactPhone, contactWhatsapp, contactEmail, contactLinkedin
   } = req.body;
   
   const updateData = { 
@@ -653,7 +657,11 @@ app.post('/admin/settings', checkAuth, upload.single('chefImage'), async (req, r
     journeyHeading, journeySubtitle,
     sustainabilityHeading, sustainabilitySubtitle,
     aboutHeading, aboutSubtitle,
-    contactHeading, contactSubtitle
+    contactHeading, contactSubtitle,
+    aboutTitleTag, aboutQuote, aboutHighlightText,
+    aboutBioParagraph1, aboutBioParagraph2,
+    aboutSignatureName, aboutSignatureTitle,
+    contactPhone, contactWhatsapp, contactEmail, contactLinkedin
   };
 
   if (req.file) {
