@@ -478,7 +478,15 @@ module.exports = {
         return defaultDoc;
       }
       const { _id, __v, ...rest } = settingsDoc;
-      return rest;
+      
+      // Merge with default values if database values are missing, null, or empty string
+      const merged = { ...rest };
+      Object.keys(DEFAULT_DATA.settings).forEach(key => {
+        if (merged[key] === undefined || merged[key] === null || merged[key] === '') {
+          merged[key] = DEFAULT_DATA.settings[key];
+        }
+      });
+      return merged;
     } catch (err) {
       console.error('Error in db.getSettings():', err.message);
       return DEFAULT_DATA.settings;
