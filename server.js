@@ -647,7 +647,14 @@ app.post('/admin/settings', checkAuth, upload.single('chefImage'), async (req, r
     aboutTitleTag, aboutQuote, aboutHighlightText,
     aboutBioParagraph1, aboutBioParagraph2,
     aboutSignatureName, aboutSignatureTitle,
-    contactPhone, contactWhatsapp, contactEmail, contactLinkedin
+    contactPhone, contactWhatsapp, contactEmail, contactLinkedin,
+    
+    aboutSpecialty1Title, aboutSpecialty1Desc,
+    aboutSpecialty2Title, aboutSpecialty2Desc,
+    aboutSpecialty3Title, aboutSpecialty3Desc,
+    aboutSpecialty4Title, aboutSpecialty4Desc,
+    contactIntroTitle, contactIntroText,
+    contactNewsletterTitle, contactNewsletterText
   } = req.body;
   
   const updateData = { 
@@ -661,7 +668,14 @@ app.post('/admin/settings', checkAuth, upload.single('chefImage'), async (req, r
     aboutTitleTag, aboutQuote, aboutHighlightText,
     aboutBioParagraph1, aboutBioParagraph2,
     aboutSignatureName, aboutSignatureTitle,
-    contactPhone, contactWhatsapp, contactEmail, contactLinkedin
+    contactPhone, contactWhatsapp, contactEmail, contactLinkedin,
+    
+    aboutSpecialty1Title, aboutSpecialty1Desc,
+    aboutSpecialty2Title, aboutSpecialty2Desc,
+    aboutSpecialty3Title, aboutSpecialty3Desc,
+    aboutSpecialty4Title, aboutSpecialty4Desc,
+    contactIntroTitle, contactIntroText,
+    contactNewsletterTitle, contactNewsletterText
   };
 
   if (req.file) {

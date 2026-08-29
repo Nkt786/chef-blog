@@ -13,9 +13,9 @@
     
     <!-- Left Column: Contact details & cards -->
     <div class="contact-info-column fade-in-up">
-      <h2>Let's Craft Something Together</h2>
+      <h2><%= settings.contactIntroTitle || "Let's Craft Something Together" %></h2>
       <p class="contact-intro-text">
-        Have questions about recipe consulting, menu engineering, or want to discuss a sustainable food project? Contact me using the details below or drop a message through the form.
+        <%= settings.contactIntroText || 'Have questions about recipe consulting, menu engineering, or want to discuss a sustainable food project? Contact me using the details below or drop a message through the form.' %>
       </p>
 
       <div class="contact-cards-grid">
@@ -64,8 +64,8 @@
 
       <!-- Quick Newsletter Card -->
       <div class="contact-newsletter-card">
-        <h3>Subscribe to Chef Newsletter</h3>
-        <p>Stay updated with seasonal recipe releases and zero-waste cooking methods directly from my kitchen.</p>
+        <h3><%= settings.contactNewsletterTitle || 'Subscribe to Chef Newsletter' %></h3>
+        <p><%= settings.contactNewsletterText || 'Stay updated with seasonal recipe releases and zero-waste cooking methods directly from my kitchen.' %></p>
         <form action="/newsletter" method="POST" class="contact-newsletter-form">
           <input type="email" name="email" placeholder="Enter your email" required aria-label="Newsletter email">
           <button type="submit" class="btn-card">SUBSCRIBE</button>

@@ -17,7 +17,19 @@ const DEFAULT_DATA = {
     contactPhone: '+91-9521342251',
     contactWhatsapp: '+91-9521342251',
     contactEmail: 'Niteshind84@yahoo.com',
-    contactLinkedin: 'chefnitesh'
+    contactLinkedin: 'chefnitesh',
+    aboutSpecialty1Title: 'Seasonal Mediterranean Menus',
+    aboutSpecialty1Desc: 'Highlighting fresh seafood, extra virgin olive oil, wild herbs, and vibrant citrus zest with authentic techniques.',
+    aboutSpecialty2Title: 'Contemporary Cooking Methods',
+    aboutSpecialty2Desc: 'Integrating precision sous-vide cooking, artisanal charcoal grilling, and traditional sourdough fermentation.',
+    aboutSpecialty3Title: 'Zero-Waste Kitchen Design',
+    aboutSpecialty3Desc: 'Creating sustainable menu programs that optimize inventory, minimize waste, and utilize local biodiverse supply chains.',
+    aboutSpecialty4Title: 'Kitchen Team Leadership',
+    aboutSpecialty4Desc: 'Training and mentoring kitchen staff in precision techniques, sanitation protocols, and high-standard operations.',
+    contactIntroTitle: "Let's Craft Something Together",
+    contactIntroText: 'Have questions about recipe consulting, menu engineering, or want to discuss a sustainable food project? Contact me using the details below or drop a message through the form.',
+    contactNewsletterTitle: 'Subscribe to Chef Newsletter',
+    contactNewsletterText: 'Stay updated with seasonal recipe releases and zero-waste cooking methods directly from my kitchen.'
   },
   blogs: [
     {
@@ -235,7 +247,21 @@ const SettingSchema = new mongoose.Schema({
   contactPhone: { type: String, default: '+91-9521342251' },
   contactWhatsapp: { type: String, default: '+91-9521342251' },
   contactEmail: { type: String, default: 'Niteshind84@yahoo.com' },
-  contactLinkedin: { type: String, default: 'chefnitesh' }
+  contactLinkedin: { type: String, default: 'chefnitesh' },
+
+  aboutSpecialty1Title: { type: String, default: 'Seasonal Mediterranean Menus' },
+  aboutSpecialty1Desc: { type: String, default: 'Highlighting fresh seafood, extra virgin olive oil, wild herbs, and vibrant citrus zest with authentic techniques.' },
+  aboutSpecialty2Title: { type: String, default: 'Contemporary Cooking Methods' },
+  aboutSpecialty2Desc: { type: String, default: 'Integrating precision sous-vide cooking, artisanal charcoal grilling, and traditional sourdough fermentation.' },
+  aboutSpecialty3Title: { type: String, default: 'Zero-Waste Kitchen Design' },
+  aboutSpecialty3Desc: { type: String, default: 'Creating sustainable menu programs that optimize inventory, minimize waste, and utilize local biodiverse supply chains.' },
+  aboutSpecialty4Title: { type: String, default: 'Kitchen Team Leadership' },
+  aboutSpecialty4Desc: { type: String, default: 'Training and mentoring kitchen staff in precision techniques, sanitation protocols, and high-standard operations.' },
+
+  contactIntroTitle: { type: String, default: "Let's Craft Something Together" },
+  contactIntroText: { type: String, default: 'Have questions about recipe consulting, menu engineering, or want to discuss a sustainable food project? Contact me using the details below or drop a message through the form.' },
+  contactNewsletterTitle: { type: String, default: 'Subscribe to Chef Newsletter' },
+  contactNewsletterText: { type: String, default: 'Stay updated with seasonal recipe releases and zero-waste cooking methods directly from my kitchen.' }
 }, { strict: false });
 
 const BlogSchema = new mongoose.Schema({

@@ -188,6 +188,37 @@
         </div>
       </div>
 
+      <h4 style="margin: 20px 0 5px; font-size: 13px; font-weight: 600; color: var(--admin-text-main);">Core Specialties (4 cards on About page)</h4>
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="aboutSpecialty1Title">Specialty 1 Title</label>
+          <input type="text" id="aboutSpecialty1Title" name="aboutSpecialty1Title" value="<%= settings.aboutSpecialty1Title || 'Seasonal Mediterranean Menus' %>">
+          <label for="aboutSpecialty1Desc" style="margin-top: 5px; font-size: 11px;">Specialty 1 Description</label>
+          <textarea id="aboutSpecialty1Desc" name="aboutSpecialty1Desc" rows="2"><%= settings.aboutSpecialty1Desc || '' %></textarea>
+        </div>
+        <div class="form-group col-6">
+          <label for="aboutSpecialty2Title">Specialty 2 Title</label>
+          <input type="text" id="aboutSpecialty2Title" name="aboutSpecialty2Title" value="<%= settings.aboutSpecialty2Title || 'Contemporary Cooking Methods' %>">
+          <label for="aboutSpecialty2Desc" style="margin-top: 5px; font-size: 11px;">Specialty 2 Description</label>
+          <textarea id="aboutSpecialty2Desc" name="aboutSpecialty2Desc" rows="2"><%= settings.aboutSpecialty2Desc || '' %></textarea>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="aboutSpecialty3Title">Specialty 3 Title</label>
+          <input type="text" id="aboutSpecialty3Title" name="aboutSpecialty3Title" value="<%= settings.aboutSpecialty3Title || 'Zero-Waste Kitchen Design' %>">
+          <label for="aboutSpecialty3Desc" style="margin-top: 5px; font-size: 11px;">Specialty 3 Description</label>
+          <textarea id="aboutSpecialty3Desc" name="aboutSpecialty3Desc" rows="2"><%= settings.aboutSpecialty3Desc || '' %></textarea>
+        </div>
+        <div class="form-group col-6">
+          <label for="aboutSpecialty4Title">Specialty 4 Title</label>
+          <input type="text" id="aboutSpecialty4Title" name="aboutSpecialty4Title" value="<%= settings.aboutSpecialty4Title || 'Kitchen Team Leadership' %>">
+          <label for="aboutSpecialty4Desc" style="margin-top: 5px; font-size: 11px;">Specialty 4 Description</label>
+          <textarea id="aboutSpecialty4Desc" name="aboutSpecialty4Desc" rows="2"><%= settings.aboutSpecialty4Desc || '' %></textarea>
+        </div>
+      </div>
+
       <!-- Contact Details Settings -->
       <h3 style="margin: 25px 0 10px; font-size: 14px; border-bottom: 1px solid var(--admin-border-color); padding-bottom: 5px; color: var(--admin-text-main);">Contact Me Details</h3>
       
@@ -207,6 +238,28 @@
         <div class="form-group col-3">
           <label for="contactLinkedin">LinkedIn Username</label>
           <input type="text" id="contactLinkedin" name="contactLinkedin" value="<%= settings.contactLinkedin || 'chefnitesh' %>">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="contactIntroTitle">Contact Intro Title</label>
+          <input type="text" id="contactIntroTitle" name="contactIntroTitle" value="<%= settings.contactIntroTitle || \"Let's Craft Something Together\" %>">
+        </div>
+        <div class="form-group col-6">
+          <label for="contactIntroText">Contact Intro Description</label>
+          <textarea id="contactIntroText" name="contactIntroText" rows="2"><%= settings.contactIntroText || '' %></textarea>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="contactNewsletterTitle">Newsletter Widget Title</label>
+          <input type="text" id="contactNewsletterTitle" name="contactNewsletterTitle" value="<%= settings.contactNewsletterTitle || 'Subscribe to Chef Newsletter' %>">
+        </div>
+        <div class="form-group col-6">
+          <label for="contactNewsletterText">Newsletter Widget Description</label>
+          <textarea id="contactNewsletterText" name="contactNewsletterText" rows="2"><%= settings.contactNewsletterText || '' %></textarea>
         </div>
       </div>
 
