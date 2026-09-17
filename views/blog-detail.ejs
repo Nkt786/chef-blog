@@ -15,7 +15,7 @@
       </header>
 
       <div class="blog-detail-featured-image">
-        <img src="<%= blog.image %>" alt="<%= blog.title %>">
+        <img src="<%= blog.image %>" alt="<%= blog.title %>" onerror="this.onerror=null;this.src='/images/default-food.jpg';">
       </div>
 
       <div class="blog-detail-content entry-content">
@@ -42,7 +42,7 @@
           <% recentBlogs.forEach(recent => { %>
             <li>
               <div class="recent-post-thumb">
-                <img src="<%= recent.image %>" alt="<%= recent.title %>">
+                <img src="<%= recent.image %>" alt="<%= recent.title %>" onerror="this.onerror=null;this.src='/images/default-food.jpg';">
               </div>
               <div class="recent-post-info">
                 <a href="/blog/<%= recent.id %>" class="recent-post-title"><%= recent.title %></a>

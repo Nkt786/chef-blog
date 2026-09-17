@@ -30,7 +30,7 @@
         <% blogs.forEach(blog => { %>
           <tr>
             <td class="td-thumb">
-              <img src="<%= blog.image %>" alt="<%= blog.title %>" class="table-thumb">
+              <img src="<%= blog.image %>" alt="<%= blog.title %>" class="table-thumb" onerror="this.onerror=null;this.src='/images/default-food.jpg';">
             </td>
             <td class="td-title">
               <strong><%= blog.title %></strong>

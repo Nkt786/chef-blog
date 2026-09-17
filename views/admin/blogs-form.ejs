@@ -20,13 +20,24 @@
       </div>
       <div class="form-group col-6">
         <label for="image">Featured Image</label>
-        <input type="file" id="image" name="image" accept="image/*">
-        <% if (blog && blog.image) { %>
-          <div class="form-image-preview">
-            <p>Current image:</p>
-            <img src="<%= blog.image %>" alt="Current Image" class="preview-thumb">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div>
+            <span style="font-size: 12px; font-weight: 600; color: #555;">Option 1: Upload from Computer/Phone</span>
+            <input type="file" id="image" name="image" accept="image/*" style="margin-top: 4px;">
           </div>
-        <% } %>
+          <div style="position: relative; text-align: center; margin: 2px 0;">
+            <span style="background: #fff; padding: 0 10px; font-size: 11px; color: #888; text-transform: uppercase; font-weight: 600;">— OR —</span>
+          </div>
+          <div>
+            <span style="font-size: 12px; font-weight: 600; color: #555;">Option 2: Paste Online Image URL (Unsplash, Cloudinary, etc.)</span>
+            <input type="url" id="imageUrl" name="imageUrl" value="<%= blog && (blog.image && !blog.image.startsWith('/uploads/') && !blog.image.startsWith('/images/')) ? blog.image : '' %>" placeholder="https://images.unsplash.com/... or any image URL" style="margin-top: 4px;">
+          </div>
+        </div>
+
+        <div class="form-image-preview" style="margin-top: 10px;">
+          <p style="font-size: 12px; margin-bottom: 4px; color: #666;">Active / Preview Image:</p>
+          <img id="imagePreviewImg" src="<%= (blog && blog.image) ? blog.image : '/images/default-food.jpg' %>" alt="Preview" class="preview-thumb" onerror="this.onerror=null;this.src='/images/default-food.jpg';" style="max-height: 100px; max-width: 160px; border-radius: 6px; border: 1px solid #ddd; object-fit: cover;">
+        </div>
       </div>
     </div>
 
@@ -36,9 +47,9 @@
     </div>
 
     <div class="form-group">
-      <label for="content">Full Blog Content (HTML allowed) *</label>
-      <textarea id="content" name="content" rows="12" required placeholder="<p>Write your detailed blog post story here...</p>"><%= blog ? blog.content : '' %></textarea>
-      <small class="form-help">You can write standard text or use raw HTML tags (like &lt;p&gt;, &lt;h3&gt;, &lt;strong&gt;, &lt;ul&gt;, &lt;li&gt;) to format your article content.</small>
+      <label for="content">Full Blog Content (Rich Text) *</label>
+      <textarea id="content" name="content" rows="12" placeholder="Write your detailed blog post story here..."><%= blog ? blog.content : '' %></textarea>
+      <small class="form-help">Use the editor toolbar above to format headings, lists, bold text, and quotes.</small>
     </div>
 
     <div class="form-group checkbox-group">
@@ -50,7 +61,7 @@
     </div>
 
     <div class="form-actions">
-      <button type="submit" class="btn-primary">SAVE POST</button>
+      <button type="submit" id="savePostBtn" class="btn-primary">SAVE POST</button>
       <a href="/admin/blogs" class="btn-secondary">CANCEL</a>
     </div>
 
@@ -59,8 +70,16 @@
 
 <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
 <script>
+  let blogEditor;
+  const contentTextarea = document.querySelector('#content');
+  const adminForm = document.querySelector('.admin-form');
+  const fileInput = document.querySelector('#image');
+  const urlInput = document.querySelector('#imageUrl');
+  const previewImg = document.querySelector('#imagePreviewImg');
+
+  // Initialize CKEditor 5
   ClassicEditor
-    .create(document.querySelector('#content'), {
+    .create(contentTextarea, {
       toolbar: [
         'heading', '|',
         'bold', 'italic', 'link', '|',
@@ -68,9 +87,57 @@
         'blockQuote', 'undo', 'redo'
       ]
     })
+    .then(editor => {
+      blogEditor = editor;
+      // Sync in real-time
+      editor.model.document.on('change:data', () => {
+        contentTextarea.value = editor.getData();
+      });
+    })
     .catch(error => {
-      console.error(error);
+      console.error('CKEditor init error:', error);
     });
+
+  // Sync and validate on form submit
+  if (adminForm) {
+    adminForm.addEventListener('submit', function(e) {
+      if (blogEditor) {
+        const data = blogEditor.getData();
+        contentTextarea.value = data;
+        const textOnly = data.replace(/<[^>]*>/g, '').trim();
+        if (!textOnly) {
+          e.preventDefault();
+          alert('⚠️ Please write some content for the blog post before saving!');
+          blogEditor.editing.view.focus();
+          return false;
+        }
+      }
+    });
+  }
+
+  // Live preview for file upload
+  if (fileInput) {
+    fileInput.addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        previewImg.src = URL.createObjectURL(this.files[0]);
+        if (urlInput) urlInput.value = '';
+      }
+    });
+  }
+
+  // Live preview for image URL
+  if (urlInput) {
+    urlInput.addEventListener('input', function() {
+      const val = this.value.trim();
+      if (val) {
+        previewImg.src = val;
+      } else if (fileInput && fileInput.files && fileInput.files[0]) {
+        previewImg.src = URL.createObjectURL(fileInput.files[0]);
+      } else {
+        previewImg.src = '<%= (blog && blog.image) ? blog.image : "/images/default-food.jpg" %>';
+      }
+    });
+  }
 </script>
 <style>
   /* Fix CKEditor look and size in the admin console */

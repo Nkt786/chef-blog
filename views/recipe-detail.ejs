@@ -22,7 +22,7 @@
 
     <!-- Main Recipe Image -->
     <div class="recipe-detail-image">
-      <img src="<%= recipe.images[0] %>" alt="<%= recipe.title %>">
+      <img src="<%= (recipe.images && recipe.images.length > 0) ? recipe.images[0] : '/images/default-food.jpg' %>" alt="<%= recipe.title %>" onerror="this.onerror=null;this.src='/images/default-food.jpg';">
     </div>
 
     <!-- Recipe Content: Ingredients & Method -->

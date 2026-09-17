@@ -25,7 +25,7 @@
               <% blogsByYear[year].forEach(blog => { %>
                 <article class="blog-card-full">
                   <div class="blog-card-img">
-                    <img src="<%= blog.image %>" alt="<%= blog.title %>">
+                    <img src="<%= blog.image %>" alt="<%= blog.title %>" onerror="this.onerror=null;this.src='/images/default-food.jpg';">
                   </div>
                   <div class="blog-card-body">
                     <div class="blog-card-meta">

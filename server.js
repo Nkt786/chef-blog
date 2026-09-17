@@ -355,18 +355,29 @@ app.get('/admin/blogs/add', checkAuth, (req, res) => {
 });
 
 app.post('/admin/blogs/add', checkAuth, upload.single('image'), async (req, res) => {
-  const { title, excerpt, content, year, published } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : '/images/default-food.jpg';
-  
-  await db.insert('blogs', {
-    title,
-    excerpt,
-    content,
-    year: year || new Date().getFullYear().toString(),
-    published: published === 'on' || published === 'true',
-    image
-  });
-  res.redirect('/admin/blogs');
+  try {
+    const { title, excerpt, content, year, published, imageUrl } = req.body;
+    let image = '/images/default-food.jpg';
+    
+    if (req.file) {
+      image = `/uploads/${req.file.filename}`;
+    } else if (imageUrl && imageUrl.trim().length > 0) {
+      image = imageUrl.trim();
+    }
+    
+    await db.insert('blogs', {
+      title: title ? title.trim() : 'Untitled Post',
+      excerpt: excerpt ? excerpt.trim() : '',
+      content: content || '',
+      year: year || new Date().getFullYear().toString(),
+      published: published === 'on' || published === 'true',
+      image
+    });
+    res.redirect('/admin/blogs');
+  } catch (err) {
+    console.error('Error adding blog post:', err);
+    res.redirect('/admin/blogs');
+  }
 });
 
 app.get('/admin/blogs/edit/:id', checkAuth, async (req, res) => {
@@ -376,24 +387,31 @@ app.get('/admin/blogs/edit/:id', checkAuth, async (req, res) => {
 });
 
 app.post('/admin/blogs/edit/:id', checkAuth, upload.single('image'), async (req, res) => {
-  const blog = await db.getById('blogs', req.params.id);
-  if (!blog) return res.redirect('/admin/blogs');
+  try {
+    const blog = await db.getById('blogs', req.params.id);
+    if (!blog) return res.redirect('/admin/blogs');
 
-  const { title, excerpt, content, year, published } = req.body;
-  const updateData = {
-    title,
-    excerpt,
-    content,
-    year: year || blog.year,
-    published: published === 'on' || published === 'true'
-  };
+    const { title, excerpt, content, year, published, imageUrl } = req.body;
+    const updateData = {
+      title: title ? title.trim() : blog.title,
+      excerpt: excerpt ? excerpt.trim() : blog.excerpt,
+      content: content !== undefined ? content : blog.content,
+      year: year || blog.year,
+      published: published === 'on' || published === 'true'
+    };
 
-  if (req.file) {
-    updateData.image = `/uploads/${req.file.filename}`;
+    if (req.file) {
+      updateData.image = `/uploads/${req.file.filename}`;
+    } else if (imageUrl && imageUrl.trim().length > 0) {
+      updateData.image = imageUrl.trim();
+    }
+
+    await db.update('blogs', req.params.id, updateData);
+    res.redirect('/admin/blogs');
+  } catch (err) {
+    console.error('Error editing blog post:', err);
+    res.redirect('/admin/blogs');
   }
-
-  await db.update('blogs', req.params.id, updateData);
-  res.redirect('/admin/blogs');
 });
 
 app.post('/admin/blogs/delete/:id', checkAuth, async (req, res) => {
@@ -415,26 +433,41 @@ app.get('/admin/recipes/add', checkAuth, async (req, res) => {
 });
 
 app.post('/admin/recipes/add', checkAuth, upload.array('images', 5), async (req, res) => {
-  const { title, description, category, type, ingredients, method } = req.body;
-  
-  const images = req.files && req.files.length > 0 
-    ? req.files.map(f => `/uploads/${f.filename}`) 
-    : ['/images/default-food.jpg'];
+  try {
+    const { title, description, category, type, ingredients, method, imageUrls } = req.body;
+    
+    let images = [];
+    if (req.files && req.files.length > 0) {
+      images = req.files.map(f => `/uploads/${f.filename}`);
+    } else if (imageUrls && imageUrls.trim().length > 0) {
+      images = imageUrls
+        .split(/[\n,]+/)
+        .map(u => u.trim())
+        .filter(u => u.length > 0);
+    }
+    
+    if (images.length === 0) {
+      images = ['/images/default-food.jpg'];
+    }
 
-  // ingredients and method are textareas, let's split them by newlines
-  const ingredientsArray = ingredients.split('\n').map(i => i.trim()).filter(i => i.length > 0);
-  const methodArray = method.split('\n').map(m => m.trim()).filter(m => m.length > 0);
+    // ingredients and method are textareas, let's split them by newlines
+    const ingredientsArray = ingredients ? ingredients.split('\n').map(i => i.trim()).filter(i => i.length > 0) : [];
+    const methodArray = method ? method.split('\n').map(m => m.trim()).filter(m => m.length > 0) : [];
 
-  await db.insert('recipes', {
-    title,
-    description,
-    category,
-    type: type || 'Veg',
-    ingredients: ingredientsArray,
-    method: methodArray,
-    images
-  });
-  res.redirect('/admin/recipes');
+    await db.insert('recipes', {
+      title: title ? title.trim() : 'Untitled Recipe',
+      description: description ? description.trim() : '',
+      category: category || 'General',
+      type: type || 'Veg',
+      ingredients: ingredientsArray,
+      method: methodArray,
+      images
+    });
+    res.redirect('/admin/recipes');
+  } catch (err) {
+    console.error('Error adding recipe:', err);
+    res.redirect('/admin/recipes');
+  }
 });
 
 app.get('/admin/recipes/edit/:id', checkAuth, async (req, res) => {
@@ -445,28 +478,41 @@ app.get('/admin/recipes/edit/:id', checkAuth, async (req, res) => {
 });
 
 app.post('/admin/recipes/edit/:id', checkAuth, upload.array('images', 5), async (req, res) => {
-  const recipe = await db.getById('recipes', req.params.id);
-  if (!recipe) return res.redirect('/admin/recipes');
+  try {
+    const recipe = await db.getById('recipes', req.params.id);
+    if (!recipe) return res.redirect('/admin/recipes');
 
-  const { title, description, category, type, ingredients, method } = req.body;
-  const ingredientsArray = ingredients.split('\n').map(i => i.trim()).filter(i => i.length > 0);
-  const methodArray = method.split('\n').map(m => m.trim()).filter(m => m.length > 0);
+    const { title, description, category, type, ingredients, method, imageUrls } = req.body;
+    const ingredientsArray = ingredients ? ingredients.split('\n').map(i => i.trim()).filter(i => i.length > 0) : recipe.ingredients;
+    const methodArray = method ? method.split('\n').map(m => m.trim()).filter(m => m.length > 0) : recipe.method;
 
-  const updateData = {
-    title,
-    description,
-    category,
-    type: type || 'Veg',
-    ingredients: ingredientsArray,
-    method: methodArray
-  };
+    const updateData = {
+      title: title ? title.trim() : recipe.title,
+      description: description ? description.trim() : recipe.description,
+      category: category || recipe.category,
+      type: type || recipe.type,
+      ingredients: ingredientsArray,
+      method: methodArray
+    };
 
-  if (req.files && req.files.length > 0) {
-    updateData.images = req.files.map(f => `/uploads/${f.filename}`);
+    if (req.files && req.files.length > 0) {
+      updateData.images = req.files.map(f => `/uploads/${f.filename}`);
+    } else if (imageUrls && imageUrls.trim().length > 0) {
+      const parsedUrls = imageUrls
+        .split(/[\n,]+/)
+        .map(u => u.trim())
+        .filter(u => u.length > 0);
+      if (parsedUrls.length > 0) {
+        updateData.images = parsedUrls;
+      }
+    }
+
+    await db.update('recipes', req.params.id, updateData);
+    res.redirect('/admin/recipes');
+  } catch (err) {
+    console.error('Error editing recipe:', err);
+    res.redirect('/admin/recipes');
   }
-
-  await db.update('recipes', req.params.id, updateData);
-  res.redirect('/admin/recipes');
 });
 
 
