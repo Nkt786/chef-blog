@@ -29,7 +29,9 @@ const DEFAULT_DATA = {
     contactIntroTitle: "Let's Craft Something Together",
     contactIntroText: 'Have questions about recipe consulting, menu engineering, or want to discuss a sustainable food project? Contact me using the details below or drop a message through the form.',
     contactNewsletterTitle: 'Subscribe to Chef Newsletter',
-    contactNewsletterText: 'Stay updated with seasonal recipe releases and zero-waste cooking methods directly from my kitchen.'
+    contactNewsletterText: 'Stay updated with seasonal recipe releases and zero-waste cooking methods directly from my kitchen.',
+    galleryHeading: 'Culinary Gallery',
+    gallerySubtitle: 'Signature Creations by Chef Nitesh'
   },
   blogs: [
     {
@@ -206,6 +208,48 @@ const DEFAULT_DATA = {
     { id: 'cat5', name: 'Vegetables' },
     { id: 'cat6', name: 'Salads' },
     { id: 'cat7', name: 'Soups' }
+  ],
+  gallery: [
+    {
+      id: 'g1',
+      title: 'Pan-Seared Sea Bass with Caponata',
+      image: '/images/sea-bass.jpg',
+      category: 'Fish',
+      description: 'Crispy skin wild sea bass served over Sicilian eggplant caponata and cold-pressed olive oil.',
+      date: '2026-08-12'
+    },
+    {
+      id: 'g2',
+      title: 'Truffle Butter Roasted Chicken',
+      image: '/images/truffle-chicken.jpg',
+      category: 'Chicken',
+      description: 'Succulent chicken breast roasted with homemade black truffle herb butter.',
+      date: '2026-08-11'
+    },
+    {
+      id: 'g3',
+      title: 'Mediterranean Herb Crusted Salmon',
+      image: '/images/recipe-salmon.jpg',
+      category: 'Fish',
+      description: 'Fresh dill, rosemary, and lemon zest crusted salmon with roasted wild asparagus.',
+      date: '2026-08-10'
+    },
+    {
+      id: 'g4',
+      title: 'Artisanal Charcoal Grilled Cuts',
+      image: '/images/charcoal-grill.jpg',
+      category: 'Grills',
+      description: 'Slow-smoked over seasoned oak and cherry wood chunks for authentic Mediterranean profiles.',
+      date: '2026-06-22'
+    },
+    {
+      id: 'g5',
+      title: 'Heirloom Beetroot & Goat Cheese',
+      image: '/images/beet-salad.jpg',
+      category: 'Salads',
+      description: 'Organic golden and red beets with goat cheese crumble and citrus reduction.',
+      date: '2026-05-18'
+    }
   ]
 };
 
@@ -324,6 +368,25 @@ const CategorySchema = new mongoose.Schema({
   name: String
 });
 
+// Image / Media Binary Storage Schema (ensures persistence across cloud restarts)
+const MediaSchema = new mongoose.Schema({
+  filename: { type: String, required: true, unique: true },
+  contentType: { type: String, default: 'image/jpeg' },
+  data: { type: Buffer, required: true },
+  size: { type: Number },
+  date: { type: Date, default: Date.now }
+});
+
+// Food Gallery Schema
+const GallerySchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  title: { type: String, required: true },
+  image: { type: String, required: true },
+  category: { type: String, default: 'Signature' },
+  description: { type: String, default: '' },
+  date: { type: String }
+});
+
 // Compile Models
 const models = {
   settings: mongoose.model('Setting', SettingSchema),
@@ -333,7 +396,9 @@ const models = {
   sustainability: mongoose.model('Sustainability', SustainabilitySchema),
   contacts: mongoose.model('Contact', ContactSchema),
   subscribers: mongoose.model('Subscriber', SubscriberSchema),
-  categories: mongoose.model('Category', CategorySchema)
+  categories: mongoose.model('Category', CategorySchema),
+  media: mongoose.model('Media', MediaSchema),
+  gallery: mongoose.model('Gallery', GallerySchema)
 };
 
 // Seed database with default data if empty
@@ -370,8 +435,22 @@ async function initializeDbSeed() {
       for (const item of DEFAULT_DATA.sustainability) {
         await new models.sustainability(item).save();
       }
+
+      // Seed gallery
+      for (const item of DEFAULT_DATA.gallery) {
+        await new models.gallery(item).save();
+      }
       
       console.log('Default data seeded successfully.');
+    } else {
+      // Ensure gallery has items if empty even if settings already existed
+      const galleryCount = await models.gallery.countDocuments();
+      if (galleryCount === 0) {
+        console.log('Seeding initial gallery dishes...');
+        for (const item of DEFAULT_DATA.gallery) {
+          await new models.gallery(item).save();
+        }
+      }
     }
   } catch (err) {
     console.error('Error during default database seeding:', err.message);
@@ -507,5 +586,56 @@ module.exports = {
       console.error('Error in db.updateSettings():', err.message);
       return null;
     }
-  }
+  },
+
+  // Media (Binary Image Storage) Methods
+  async saveMedia(filename, contentType, buffer) {
+    try {
+      await models.media.findOneAndUpdate(
+        { filename },
+        { filename, contentType, data: buffer, size: buffer.length, date: new Date() },
+        { upsert: true, new: true }
+      );
+      return true;
+    } catch (err) {
+      console.error('Error in db.saveMedia():', err.message);
+      return false;
+    }
+  },
+
+  async getMedia(filename) {
+    try {
+      const doc = await models.media.findOne({ filename }).lean();
+      if (!doc) return null;
+      if (doc.data && !Buffer.isBuffer(doc.data)) {
+        doc.data = doc.data.buffer ? Buffer.from(doc.data.buffer) : Buffer.from(doc.data);
+      }
+      return doc;
+    } catch (err) {
+      console.error(`Error in db.getMedia(${filename}):`, err.message);
+      return null;
+    }
+  },
+
+  async deleteMedia(filename) {
+    try {
+      await models.media.deleteOne({ filename });
+      return true;
+    } catch (err) {
+      console.error(`Error in db.deleteMedia(${filename}):`, err.message);
+      return false;
+    }
+  },
+
+  async getAllMediaFilenames() {
+    try {
+      const items = await models.media.find({}, 'filename').lean();
+      return items.map(m => m.filename);
+    } catch (err) {
+      console.error('Error in db.getAllMediaFilenames():', err.message);
+      return [];
+    }
+  },
+
+  models
 };

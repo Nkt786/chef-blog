@@ -35,38 +35,40 @@
   </div>
 </section>
 
-<!-- Featured Recipes Grid -->
+<!-- Culinary Gallery Showcase Grid -->
 <section class="recipes-preview-section scroll-reveal">
   <div class="container">
     <div class="section-header">
-      <span class="section-subtitle">FROM THE KITCHEN</span>
-      <h2 class="section-title">Featured Recipes</h2>
+      <span class="section-subtitle">SIGNATURE DISHES</span>
+      <h2 class="section-title">Culinary Gallery</h2>
       <div class="section-line"></div>
     </div>
     
     <div class="recipes-grid">
-      <% featuredRecipes.forEach(recipe => { %>
-        <article class="recipe-card">
-          <div class="recipe-card-image">
-            <img src="<%= recipe.images[0] %>" alt="<%= recipe.title %>">
-            <span class="recipe-category-tag"><%= recipe.category %></span>
+      <% featuredGallery.forEach(item => { %>
+        <article class="gallery-card">
+          <div class="gallery-card-image-wrapper" style="height: 240px;">
+            <a href="/gallery">
+              <img src="<%= item.image %>" alt="<%= item.title %>" onerror="this.onerror=null;this.src='/images/default-food.jpg';">
+            </a>
+            <span class="gallery-category-badge"><%= item.category || 'Specialty' %></span>
           </div>
-          <div class="recipe-card-content">
-            <div style="display: flex; align-items: center; margin-bottom: 8px;">
-              <span class="recipe-type-badge <%= recipe.type === 'Non-Veg' ? 'type-nonveg' : 'type-veg' %>" style="margin-top: 0;">
-                <span class="type-dot-box"><span class="type-dot"></span></span>
-                <%= recipe.type || 'Veg' %>
-              </span>
+          <div class="gallery-card-body">
+            <h3 class="gallery-dish-name" style="font-size: 20px;"><a href="/gallery" style="color: inherit;"><%= item.title %></a></h3>
+            <% if (item.description) { %>
+              <p class="gallery-dish-desc" style="margin-bottom: 12px;"><%= item.description %></p>
+            <% } %>
+            <div class="gallery-card-footer" style="padding-top: 8px;">
+              <a href="/gallery" class="gallery-btn-view">
+                VIEW DISH <i class="fas fa-arrow-right"></i>
+              </a>
             </div>
-            <h3 class="recipe-title-link"><a href="/recipes/<%= recipe.id %>"><%= recipe.title %></a></h3>
-            <p class="recipe-excerpt"><%= recipe.description %></p>
-            <a href="/recipes/<%= recipe.id %>" class="btn-card">VIEW RECIPE</a>
           </div>
         </article>
       <% }) %>
     </div>
-    <div class="section-actions">
-      <a href="/recipes" class="btn-outline-sage">VIEW ALL RECIPES</a>
+    <div class="section-actions" style="margin-top: 40px; text-align: center;">
+      <a href="/gallery" class="btn-outline-sage">EXPLORE FULL GALLERY <i class="fas fa-arrow-right"></i></a>
     </div>
   </div>
 </section>
@@ -82,7 +84,7 @@
         </div>
       </div>
       <div class="showcase-item">
-        <img src="<%= settings.chefImage || '/images/chef-portrait.jpg' %>" alt="Chef Nitesh Sharma in action">
+        <img src="<%= settings.chefImage || '/images/chef-portrait.jpg' %>" alt="Chef Nitesh Sharma in action" onerror="this.onerror=null;this.src='/images/chef-portrait.jpg';">
         <div class="showcase-overlay">
           <span>Chef Nitesh Sharma</span>
         </div>
@@ -152,7 +154,7 @@
       <div class="sidebar-widget about-widget">
         <h3 class="widget-title">The Chef</h3>
         <div class="chef-widget-image">
-          <img src="<%= settings.chefImage || '/images/chef-portrait.jpg' %>" alt="Chef Nitesh Sharma Portrait">
+          <img src="<%= settings.chefImage || '/images/chef-portrait.jpg' %>" alt="Chef Nitesh Sharma Portrait" onerror="this.onerror=null;this.src='/images/chef-portrait.jpg';">
         </div>
         <p class="chef-widget-intro">
           Chef Nitesh Sharma is a classically trained culinary professional specializing in modern Mediterranean menus, farm-to-table cuisine, and zero-waste kitchen practices.

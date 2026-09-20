@@ -29,6 +29,63 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Helper to persist uploaded files into MongoDB Atlas
+async function persistUploadedFile(file) {
+  if (!file) return;
+  try {
+    const filePath = file.path;
+    if (fs.existsSync(filePath)) {
+      const buffer = fs.readFileSync(filePath);
+      await db.saveMedia(file.filename, file.mimetype || 'image/jpeg', buffer);
+    }
+  } catch (err) {
+    console.error('Error persisting uploaded file to MongoDB:', err.message);
+  }
+}
+
+// Persistent Image Serving Route (handles cloud ephemeral disk restarts & local dev)
+app.get('/uploads/:filename', async (req, res) => {
+  const filename = req.params.filename;
+  const localPath = path.join(uploadDir, filename);
+
+  // If cached on local disk, serve immediately
+  if (fs.existsSync(localPath)) {
+    return res.sendFile(localPath);
+  }
+
+  // If not on disk, pull from MongoDB Atlas
+  try {
+    const media = await db.getMedia(filename);
+    if (media && media.data) {
+      const imgBuffer = Buffer.isBuffer(media.data) ? media.data : (media.data.buffer ? Buffer.from(media.data.buffer) : Buffer.from(media.data));
+      // Write to local disk cache for fast future requests
+      try {
+        fs.writeFileSync(localPath, imgBuffer);
+      } catch (e) {
+        // Non-blocking if disk write fails
+      }
+      res.contentType(media.contentType || 'image/jpeg');
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
+      return res.end(imgBuffer);
+    }
+  } catch (err) {
+    console.error('Error retrieving media from MongoDB:', err);
+  }
+
+  // Graceful fallback instead of broken 404
+  try {
+    const settings = await db.getSettings();
+    if (settings && settings.chefImage && settings.chefImage.includes(filename)) {
+      return res.redirect('/images/chef-portrait.jpg');
+    }
+  } catch (e) {}
+
+  if (filename.toLowerCase().includes('chef')) {
+    return res.redirect('/images/chef-portrait.jpg');
+  }
+  return res.redirect('/images/default-food.jpg');
+});
+
 // Configure Sessions
 app.use(session({
   secret: 'chef-nitesh-sharma-key-2026',
@@ -105,7 +162,7 @@ app.use((req, res, next) => {
 // 1. Home Page
 app.get('/', async (req, res) => {
   const blogs = await db.get('blogs');
-  const recipes = await db.get('recipes');
+  let gallery = await db.get('gallery');
   const journey = await db.get('journey');
   const sustainability = await db.get('sustainability');
 
@@ -115,9 +172,22 @@ app.get('/', async (req, res) => {
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 3);
 
-  // Take top 3 recipes for preview
-  const featuredRecipes = recipes
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
+  // If gallery is empty, fall back to recipes
+  if (!gallery || gallery.length === 0) {
+    const recipes = await db.get('recipes');
+    gallery = recipes.map(r => ({
+      id: r.id,
+      title: r.title,
+      image: (r.images && r.images.length > 0) ? r.images[0] : '/images/default-food.jpg',
+      category: r.category || 'Specialty',
+      description: r.description || '',
+      date: r.date
+    }));
+  }
+
+  // Take top 3 dishes for gallery preview
+  const featuredGallery = gallery
+    .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
     .slice(0, 3);
 
   // Sort journey by year desc, take top 3
@@ -127,7 +197,7 @@ app.get('/', async (req, res) => {
 
   res.render('home', {
     latestBlogs,
-    featuredRecipes,
+    featuredGallery,
     journeyPreview: sortedJourney,
     sustainabilityPreview: sustainability.slice(0, 2)
   });
@@ -200,38 +270,47 @@ app.get('/journey', async (req, res) => {
   res.render('journey', { journeyByYear, years });
 });
 
-// 5. Recipes Listing Page
-app.get('/recipes', async (req, res) => {
-  const recipes = await db.get('recipes');
+// 5. Food Gallery Listing Page
+app.get('/gallery', async (req, res) => {
+  let gallery = await db.get('gallery');
+  if (!gallery || gallery.length === 0) {
+    const recipes = await db.get('recipes');
+    gallery = recipes.map(r => ({
+      id: r.id,
+      title: r.title,
+      image: (r.images && r.images.length > 0) ? r.images[0] : '/images/default-food.jpg',
+      category: r.category || 'Specialty',
+      description: r.description || '',
+      date: r.date
+    }));
+  }
+
   const categoryFilter = req.query.category || 'All';
   
-  // Load categories dynamically from database
+  // Load categories dynamically
   const dbCategories = await db.get('categories');
-  const categories = dbCategories.map(c => c.name);
+  const catNames = new Set(dbCategories.map(c => c.name));
+  gallery.forEach(g => { if (g.category) catNames.add(g.category); });
+  const categories = Array.from(catNames);
 
-  let filteredRecipes = recipes;
+  let filteredGallery = gallery;
   if (categoryFilter !== 'All') {
-    filteredRecipes = recipes.filter(r => r.category && r.category.toLowerCase() === categoryFilter.toLowerCase());
+    filteredGallery = gallery.filter(r => r.category && r.category.toLowerCase() === categoryFilter.toLowerCase());
   }
 
   // Sort by date desc
-  filteredRecipes.sort((a, b) => new Date(b.date) - new Date(a.date));
+  filteredGallery.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
-  res.render('recipes', { 
-    recipes: filteredRecipes, 
+  res.render('gallery', { 
+    gallery: filteredGallery, 
     categories, 
     selectedCategory: categoryFilter 
   });
 });
 
-// 6. Recipe Detail Page
-app.get('/recipes/:id', async (req, res) => {
-  const recipe = await db.getById('recipes', req.params.id);
-  if (!recipe) {
-    return res.status(404).send('Recipe Not Found');
-  }
-  res.render('recipe-detail', { recipe });
-});
+// Backward compatibility redirects for old recipe links
+app.get('/recipes', (req, res) => res.redirect(301, '/gallery'));
+app.get('/recipes/:id', (req, res) => res.redirect(301, '/gallery'));
 
 // 7. Sustainability Page
 app.get('/sustainability', async (req, res) => {
@@ -331,13 +410,14 @@ app.get('/admin/logout', (req, res) => {
 // Admin Dashboard - Home
 app.get('/admin', checkAuth, async (req, res) => {
   const blogs = await db.get('blogs');
-  const recipes = await db.get('recipes');
+  const gallery = await db.get('gallery');
   const contacts = await db.get('contacts');
   const subscribers = await db.get('subscribers');
 
   res.render('admin/dashboard', {
     blogCount: blogs.length,
-    recipeCount: recipes.length,
+    galleryCount: gallery.length,
+    recipeCount: gallery.length,
     unreadEnquiries: contacts.filter(c => !c.read).length,
     subscriberCount: subscribers.length
   });
@@ -361,6 +441,7 @@ app.post('/admin/blogs/add', checkAuth, upload.single('image'), async (req, res)
     
     if (req.file) {
       image = `/uploads/${req.file.filename}`;
+      await persistUploadedFile(req.file);
     } else if (imageUrl && imageUrl.trim().length > 0) {
       image = imageUrl.trim();
     }
@@ -402,6 +483,7 @@ app.post('/admin/blogs/edit/:id', checkAuth, upload.single('image'), async (req,
 
     if (req.file) {
       updateData.image = `/uploads/${req.file.filename}`;
+      await persistUploadedFile(req.file);
     } else if (imageUrl && imageUrl.trim().length > 0) {
       updateData.image = imageUrl.trim();
     }
@@ -420,100 +502,115 @@ app.post('/admin/blogs/delete/:id', checkAuth, async (req, res) => {
 });
 
 
-// --- ADMIN: RECIPES ---
-app.get('/admin/recipes', checkAuth, async (req, res) => {
-  const recipes = await db.get('recipes');
-  recipes.sort((a, b) => new Date(b.date) - new Date(a.date));
-  res.render('admin/recipes', { recipes });
+// --- ADMIN: FOOD GALLERY ---
+app.get('/admin/gallery', checkAuth, async (req, res) => {
+  let gallery = await db.get('gallery');
+  if (!gallery || gallery.length === 0) {
+    const recipes = await db.get('recipes');
+    gallery = recipes.map(r => ({
+      id: r.id,
+      title: r.title,
+      image: (r.images && r.images.length > 0) ? r.images[0] : '/images/default-food.jpg',
+      category: r.category || 'Specialty',
+      description: r.description || '',
+      date: r.date
+    }));
+  }
+  gallery.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+  res.render('admin/gallery', { gallery });
 });
 
-app.get('/admin/recipes/add', checkAuth, async (req, res) => {
-  const categories = await db.get('categories');
-  res.render('admin/recipes-form', { recipe: null, categories });
+app.get('/admin/gallery/add', checkAuth, async (req, res) => {
+  const dbCategories = await db.get('categories');
+  const categories = dbCategories.map(c => c.name);
+  res.render('admin/gallery-form', { item: null, categories });
 });
 
-app.post('/admin/recipes/add', checkAuth, upload.array('images', 5), async (req, res) => {
+app.post('/admin/gallery/add', checkAuth, upload.single('image'), async (req, res) => {
   try {
-    const { title, description, category, type, ingredients, method, imageUrls } = req.body;
-    
-    let images = [];
-    if (req.files && req.files.length > 0) {
-      images = req.files.map(f => `/uploads/${f.filename}`);
-    } else if (imageUrls && imageUrls.trim().length > 0) {
-      images = imageUrls
-        .split(/[\n,]+/)
-        .map(u => u.trim())
-        .filter(u => u.length > 0);
-    }
-    
-    if (images.length === 0) {
-      images = ['/images/default-food.jpg'];
+    const { title, category, description, imageUrl } = req.body;
+    let image = '/images/default-food.jpg';
+
+    if (req.file) {
+      image = `/uploads/${req.file.filename}`;
+      await persistUploadedFile(req.file);
+    } else if (imageUrl && imageUrl.trim().length > 0) {
+      image = imageUrl.trim();
     }
 
-    // ingredients and method are textareas, let's split them by newlines
-    const ingredientsArray = ingredients ? ingredients.split('\n').map(i => i.trim()).filter(i => i.length > 0) : [];
-    const methodArray = method ? method.split('\n').map(m => m.trim()).filter(m => m.length > 0) : [];
-
-    await db.insert('recipes', {
-      title: title ? title.trim() : 'Untitled Recipe',
+    await db.insert('gallery', {
+      title: title ? title.trim() : 'Untitled Dish',
+      category: category || 'Signature',
       description: description ? description.trim() : '',
-      category: category || 'General',
-      type: type || 'Veg',
-      ingredients: ingredientsArray,
-      method: methodArray,
-      images
+      image
     });
-    res.redirect('/admin/recipes');
+    res.redirect('/admin/gallery');
   } catch (err) {
-    console.error('Error adding recipe:', err);
-    res.redirect('/admin/recipes');
+    console.error('Error adding gallery dish:', err);
+    res.redirect('/admin/gallery');
   }
 });
 
-app.get('/admin/recipes/edit/:id', checkAuth, async (req, res) => {
-  const recipe = await db.getById('recipes', req.params.id);
-  if (!recipe) return res.redirect('/admin/recipes');
-  const categories = await db.get('categories');
-  res.render('admin/recipes-form', { recipe, categories });
+app.get('/admin/gallery/edit/:id', checkAuth, async (req, res) => {
+  let item = await db.getById('gallery', req.params.id);
+  if (!item) {
+    // Check recipes fallback
+    const recipe = await db.getById('recipes', req.params.id);
+    if (recipe) {
+      item = {
+        id: recipe.id,
+        title: recipe.title,
+        image: (recipe.images && recipe.images.length > 0) ? recipe.images[0] : '/images/default-food.jpg',
+        category: recipe.category || 'Specialty',
+        description: recipe.description || ''
+      };
+    }
+  }
+  if (!item) return res.redirect('/admin/gallery');
+  const dbCategories = await db.get('categories');
+  const categories = dbCategories.map(c => c.name);
+  res.render('admin/gallery-form', { item, categories });
 });
 
-app.post('/admin/recipes/edit/:id', checkAuth, upload.array('images', 5), async (req, res) => {
+app.post('/admin/gallery/edit/:id', checkAuth, upload.single('image'), async (req, res) => {
   try {
-    const recipe = await db.getById('recipes', req.params.id);
-    if (!recipe) return res.redirect('/admin/recipes');
-
-    const { title, description, category, type, ingredients, method, imageUrls } = req.body;
-    const ingredientsArray = ingredients ? ingredients.split('\n').map(i => i.trim()).filter(i => i.length > 0) : recipe.ingredients;
-    const methodArray = method ? method.split('\n').map(m => m.trim()).filter(m => m.length > 0) : recipe.method;
+    let item = await db.getById('gallery', req.params.id);
+    const { title, category, description, imageUrl } = req.body;
 
     const updateData = {
-      title: title ? title.trim() : recipe.title,
-      description: description ? description.trim() : recipe.description,
-      category: category || recipe.category,
-      type: type || recipe.type,
-      ingredients: ingredientsArray,
-      method: methodArray
+      title: title ? title.trim() : (item ? item.title : 'Untitled Dish'),
+      category: category || (item ? item.category : 'Signature'),
+      description: description !== undefined ? description.trim() : (item ? item.description : '')
     };
 
-    if (req.files && req.files.length > 0) {
-      updateData.images = req.files.map(f => `/uploads/${f.filename}`);
-    } else if (imageUrls && imageUrls.trim().length > 0) {
-      const parsedUrls = imageUrls
-        .split(/[\n,]+/)
-        .map(u => u.trim())
-        .filter(u => u.length > 0);
-      if (parsedUrls.length > 0) {
-        updateData.images = parsedUrls;
-      }
+    if (req.file) {
+      updateData.image = `/uploads/${req.file.filename}`;
+      await persistUploadedFile(req.file);
+    } else if (imageUrl && imageUrl.trim().length > 0) {
+      updateData.image = imageUrl.trim();
     }
 
-    await db.update('recipes', req.params.id, updateData);
-    res.redirect('/admin/recipes');
+    if (item) {
+      await db.update('gallery', req.params.id, updateData);
+    } else {
+      await db.insert('gallery', { id: req.params.id, ...updateData });
+    }
+    res.redirect('/admin/gallery');
   } catch (err) {
-    console.error('Error editing recipe:', err);
-    res.redirect('/admin/recipes');
+    console.error('Error editing gallery dish:', err);
+    res.redirect('/admin/gallery');
   }
 });
+
+app.post('/admin/gallery/delete/:id', checkAuth, async (req, res) => {
+  await db.delete('gallery', req.params.id);
+  await db.delete('recipes', req.params.id);
+  res.redirect('/admin/gallery');
+});
+
+// Admin recipes backward compatibility redirects
+app.get('/admin/recipes', (req, res) => res.redirect('/admin/gallery'));
+app.get('/admin/recipes/*', (req, res) => res.redirect('/admin/gallery'));
 
 
 // --- ADMIN: RECIPES CATEGORIES ---
@@ -599,7 +696,11 @@ app.get('/admin/sustainability', checkAuth, async (req, res) => {
 
 app.post('/admin/sustainability/add', checkAuth, upload.single('image'), async (req, res) => {
   const { title, content } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : '/images/default-sustainability.jpg';
+  let image = '/images/default-sustainability.jpg';
+  if (req.file) {
+    image = `/uploads/${req.file.filename}`;
+    await persistUploadedFile(req.file);
+  }
   await db.insert('sustainability', { title, content, image });
   res.redirect('/admin/sustainability');
 });
@@ -609,6 +710,7 @@ app.post('/admin/sustainability/edit/:id', checkAuth, upload.single('image'), as
   const updateData = { title, content };
   if (req.file) {
     updateData.image = `/uploads/${req.file.filename}`;
+    await persistUploadedFile(req.file);
   }
   await db.update('sustainability', req.params.id, updateData);
   res.redirect('/admin/sustainability');
@@ -622,30 +724,37 @@ app.post('/admin/sustainability/delete/:id', checkAuth, async (req, res) => {
 
 // --- ADMIN: MEDIA GALLERY ---
 app.get('/admin/media', checkAuth, async (req, res) => {
-  fs.readdir(uploadDir, (err, files) => {
-    if (err) {
-      return res.render('admin/media', { images: [], error: 'Failed to read media folder' });
+  try {
+    let diskFiles = [];
+    if (fs.existsSync(uploadDir)) {
+      diskFiles = fs.readdirSync(uploadDir).filter(file => /\.(jpg|jpeg|png|webp|gif)$/i.test(file));
     }
-    const imageUrls = files
-      .filter(file => /\.(jpg|jpeg|png|webp|gif)$/i.test(file))
-      .map(file => `/uploads/${file}`);
+    const dbFilenames = await db.getAllMediaFilenames();
+    const allFiles = Array.from(new Set([...diskFiles, ...dbFilenames]));
+    const imageUrls = allFiles.map(file => `/uploads/${file}`);
     res.render('admin/media', { images: imageUrls, error: null });
-  });
+  } catch (err) {
+    res.render('admin/media', { images: [], error: 'Failed to read media folder' });
+  }
 });
 
-app.post('/admin/media/upload', checkAuth, upload.single('mediafile'), (req, res) => {
+app.post('/admin/media/upload', checkAuth, upload.single('mediafile'), async (req, res) => {
+  if (req.file) {
+    await persistUploadedFile(req.file);
+  }
   res.redirect('/admin/media');
 });
 
-app.post('/admin/media/delete', checkAuth, (req, res) => {
+app.post('/admin/media/delete', checkAuth, async (req, res) => {
   const { imagePath } = req.body;
   if (!imagePath || !imagePath.startsWith('/uploads/')) {
     return res.redirect('/admin/media');
   }
+  const filename = path.basename(imagePath);
   const fullPath = path.join(__dirname, 'public', imagePath);
-  fs.unlink(fullPath, (err) => {
-    res.redirect('/admin/media');
-  });
+  fs.unlink(fullPath, () => {});
+  await db.deleteMedia(filename);
+  res.redirect('/admin/media');
 });
 
 
@@ -684,6 +793,7 @@ app.post('/admin/newsletter/delete/:id', checkAuth, async (req, res) => {
 app.post('/admin/settings', checkAuth, upload.single('chefImage'), async (req, res) => {
   const { 
     brandName, shortDescription, tagline, adminPassword,
+    galleryHeading, gallerySubtitle,
     recipeHeading, recipeSubtitle,
     blogHeading, blogSubtitle,
     journeyHeading, journeySubtitle,
@@ -705,7 +815,10 @@ app.post('/admin/settings', checkAuth, upload.single('chefImage'), async (req, r
   
   const updateData = { 
     brandName, shortDescription, tagline,
-    recipeHeading, recipeSubtitle,
+    galleryHeading: galleryHeading || recipeHeading,
+    gallerySubtitle: gallerySubtitle || recipeSubtitle,
+    recipeHeading: galleryHeading || recipeHeading,
+    recipeSubtitle: gallerySubtitle || recipeSubtitle,
     blogHeading, blogSubtitle,
     journeyHeading, journeySubtitle,
     sustainabilityHeading, sustainabilitySubtitle,
@@ -726,6 +839,7 @@ app.post('/admin/settings', checkAuth, upload.single('chefImage'), async (req, r
 
   if (req.file) {
     updateData.chefImage = `/uploads/${req.file.filename}`;
+    await persistUploadedFile(req.file);
   }
 
   if (adminPassword && adminPassword.trim().length > 0) {

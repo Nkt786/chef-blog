@@ -1,0 +1,109 @@
+<%- include('partials/header', { title: 'Culinary Gallery' }) %>
+
+<section class="page-title-section fade-in-up">
+  <div class="container">
+    <span class="page-subtitle"><%= settings.gallerySubtitle || settings.recipeSubtitle || 'Signature Creations by Chef Nitesh' %></span>
+    <h1 class="page-title"><%= settings.galleryHeading || settings.recipeHeading || 'Culinary Gallery' %></h1>
+    <div class="section-line"></div>
+  </div>
+</section>
+
+<!-- Gallery Section -->
+<section class="gallery-page-section">
+  <div class="container">
+
+    <!-- Categories Filter Tabs -->
+    <div class="gallery-categories-tabs scroll-reveal">
+      <a href="/gallery" class="gallery-tab <%= selectedCategory === 'All' ? 'active' : '' %>">All Dishes</a>
+      <% categories.forEach(cat => { %>
+        <a href="/gallery?category=<%= encodeURIComponent(cat) %>" class="gallery-tab <%= selectedCategory === cat ? 'active' : '' %>"><%= cat %></a>
+      <% }) %>
+    </div>
+
+    <!-- Gallery Cards Grid -->
+    <% if (gallery.length === 0) { %>
+      <div class="no-recipes scroll-reveal" style="text-align: center; padding: 60px 20px; background: #fff; border: 1px solid var(--color-border);">
+        <i class="fas fa-utensils" style="font-size: 36px; color: var(--color-sage); margin-bottom: 15px; display: block;"></i>
+        <p style="font-size: 16px; color: var(--color-charcoal);">No food pictures found in the <strong><%= selectedCategory %></strong> category yet.</p>
+        <p style="margin-top: 15px;"><a href="/gallery" class="btn-outline-sage">View All Dishes</a></p>
+      </div>
+    <% } else { %>
+      <div class="gallery-grid scroll-reveal">
+        <% gallery.forEach(item => { %>
+          <article class="gallery-card">
+            <div class="gallery-card-image-wrapper" onclick="openLightbox('<%= item.image %>', '<%= (item.title || "").replace(/\'/g, "\\\'") %>', '<%= (item.description || "").replace(/\'/g, "\\\'") %>')">
+              <img src="<%= item.image %>" alt="<%= item.title %>" onerror="this.onerror=null;this.src='/images/default-food.jpg';" loading="lazy">
+              <span class="gallery-category-badge"><%= item.category || 'Specialty' %></span>
+              <div class="gallery-zoom-overlay">
+                <span><i class="fas fa-search-plus"></i> View Dish</span>
+              </div>
+            </div>
+            <div class="gallery-card-body">
+              <h3 class="gallery-dish-name"><%= item.title %></h3>
+              <% if (item.description) { %>
+                <p class="gallery-dish-desc"><%= item.description %></p>
+              <% } %>
+              <div class="gallery-card-footer">
+                <span class="gallery-date"><%= item.date ? new Date(item.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '' %></span>
+                <button type="button" class="gallery-btn-view" onclick="openLightbox('<%= item.image %>', '<%= (item.title || "").replace(/\'/g, "\\\'") %>', '<%= (item.description || "").replace(/\'/g, "\\\'") %>')">
+                  <i class="fas fa-expand-alt"></i> Enlarge
+                </button>
+              </div>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    <% } %>
+
+  </div>
+</section>
+
+<!-- Lightbox Modal -->
+<div class="gallery-lightbox-overlay" id="galleryLightbox">
+  <div class="gallery-lightbox-content">
+    <button type="button" class="gallery-lightbox-close" onclick="closeLightbox()">&times;</button>
+    <div class="gallery-lightbox-img-box">
+      <img id="lightboxImg" src="" alt="Dish Full View" onerror="this.onerror=null;this.src='/images/default-food.jpg';">
+    </div>
+    <div class="gallery-lightbox-caption">
+      <h2 class="gallery-lightbox-title" id="lightboxTitle"></h2>
+      <p class="gallery-lightbox-desc" id="lightboxDesc"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openLightbox(imgSrc, title, desc) {
+    const modal = document.getElementById('galleryLightbox');
+    const img = document.getElementById('lightboxImg');
+    const titleEl = document.getElementById('lightboxTitle');
+    const descEl = document.getElementById('lightboxDesc');
+    
+    img.src = imgSrc;
+    titleEl.textContent = title;
+    descEl.textContent = desc;
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    const modal = document.getElementById('galleryLightbox');
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('galleryLightbox').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeLightbox();
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeLightbox();
+    }
+  });
+</script>
+
+<%- include('partials/footer') %>

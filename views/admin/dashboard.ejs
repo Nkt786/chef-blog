@@ -13,11 +13,11 @@
   </div>
 
   <div class="stat-card">
-    <div class="stat-icon icon-green"><i class="fas fa-utensils"></i></div>
+    <div class="stat-icon icon-green"><i class="fas fa-camera-retro"></i></div>
     <div class="stat-info">
-      <h3>Recipes</h3>
-      <p class="stat-number"><%= recipeCount %></p>
-      <a href="/admin/recipes" class="stat-link">Manage Recipes <i class="fas fa-arrow-right"></i></a>
+      <h3>Gallery Dishes</h3>
+      <p class="stat-number"><%= typeof galleryCount !== 'undefined' ? galleryCount : 0 %></p>
+      <a href="/admin/gallery" class="stat-link">Manage Gallery <i class="fas fa-arrow-right"></i></a>
     </div>
   </div>
 
@@ -68,13 +68,13 @@
       <div class="form-row">
         <div class="form-group col-6">
           <label for="chefImage">Chef Profile Image (Portrait)</label>
-          <input type="file" id="chefImage" name="chefImage" accept="image/*">
-          <small class="form-help">Upload a portrait image of the chef (will replace the default portrait on all pages).</small>
+          <input type="file" id="chefImage" name="chefImage" accept="image/*" class="crop-input" data-aspect="0.75" data-preview="#chefPreviewImg">
+          <small class="form-help">Select an image to open the <strong>interactive cropper & editor</strong> to frame it perfectly (3:4 portrait ratio recommended).</small>
         </div>
         <div class="form-group col-6">
           <label>Current Profile Image</label>
           <div style="margin-top: 5px;">
-            <img src="<%= settings.chefImage || '/images/chef-portrait.jpg' %>" alt="Chef Portrait Preview" style="height: 70px; border-radius: 8px; border: 1px solid var(--admin-border-color); object-fit: cover;">
+            <img id="chefPreviewImg" src="<%= settings.chefImage || '/images/chef-portrait.jpg' %>" alt="Chef Portrait Preview" onerror="this.onerror=null;this.src='/images/chef-portrait.jpg';" style="height: 85px; width: 68px; border-radius: 6px; border: 1px solid var(--admin-border-color); object-fit: cover; object-position: top center;">
           </div>
         </div>
       </div>
@@ -83,12 +83,12 @@
 
       <div class="form-row">
         <div class="form-group col-6">
-          <label for="recipeSubtitle">Recipes Page Subtitle</label>
-          <input type="text" id="recipeSubtitle" name="recipeSubtitle" value="<%= settings.recipeSubtitle || 'From the Chef\'s Notebook' %>">
+          <label for="gallerySubtitle">Gallery Page Subtitle</label>
+          <input type="text" id="gallerySubtitle" name="gallerySubtitle" value="<%= settings.gallerySubtitle || settings.recipeSubtitle || 'Signature Creations by Chef Nitesh' %>">
         </div>
         <div class="form-group col-6">
-          <label for="recipeHeading">Recipes Page Heading</label>
-          <input type="text" id="recipeHeading" name="recipeHeading" value="<%= settings.recipeHeading || 'Culinary Recipes' %>">
+          <label for="galleryHeading">Gallery Page Heading</label>
+          <input type="text" id="galleryHeading" name="galleryHeading" value="<%= settings.galleryHeading || settings.recipeHeading || 'Culinary Gallery' %>">
         </div>
       </div>
 
