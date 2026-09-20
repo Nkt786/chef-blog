@@ -368,7 +368,6 @@ const CategorySchema = new mongoose.Schema({
   name: String
 });
 
-// Image / Media Binary Storage Schema (ensures persistence across cloud restarts)
 const MediaSchema = new mongoose.Schema({
   filename: { type: String, required: true, unique: true },
   contentType: { type: String, default: 'image/jpeg' },
@@ -377,7 +376,6 @@ const MediaSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now }
 });
 
-// Food Gallery Schema
 const GallerySchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   title: { type: String, required: true },

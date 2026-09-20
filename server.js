@@ -29,7 +29,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Helper to persist uploaded files into MongoDB Atlas
+// Media upload helper
 async function persistUploadedFile(file) {
   if (!file) return;
   try {
@@ -43,7 +43,7 @@ async function persistUploadedFile(file) {
   }
 }
 
-// Persistent Image Serving Route (handles cloud ephemeral disk restarts & local dev)
+// Media file route
 app.get('/uploads/:filename', async (req, res) => {
   const filename = req.params.filename;
   const localPath = path.join(uploadDir, filename);
@@ -72,7 +72,7 @@ app.get('/uploads/:filename', async (req, res) => {
     console.error('Error retrieving media from MongoDB:', err);
   }
 
-  // Graceful fallback instead of broken 404
+  // Media fallback
   try {
     const settings = await db.getSettings();
     if (settings && settings.chefImage && settings.chefImage.includes(filename)) {
