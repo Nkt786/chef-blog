@@ -31,7 +31,7 @@
         <% contentBlocks.forEach((block, index) => { %>
           <div class="sustainability-row scroll-reveal <%= index % 2 !== 0 ? 'row-reverse' : '' %>">
             <div class="sustainability-img-box">
-              <img src="<%= block.image %>" alt="<%= block.title %>">
+              <img src="<%= block.image %>" alt="<%= block.title %>" onerror="this.onerror=null;this.src='/images/sustainability-kitchen.jpg';">
             </div>
             <div class="sustainability-text-box">
               <h2 class="sustainability-block-title"><%= block.title %></h2>

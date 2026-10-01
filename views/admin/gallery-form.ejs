@@ -5,24 +5,41 @@
   <p><%= item ? 'Update food dish details and image' : 'Upload a food picture with dish name, category, and optional description' %></p>
 </div>
 
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="login-error" style="margin-bottom: 20px; background: #fff1f0; border: 1px solid #ffa39e; color: #cf1322; padding: 12px 18px; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 14px;">
+    <i class="fas fa-exclamation-circle" style="font-size: 18px;"></i>
+    <span><%= error %></span>
+  </div>
+<% } %>
+
+<% if (typeof success !== 'undefined' && success) { %>
+  <div class="login-success" style="margin-bottom: 20px; background: #f6ffed; border: 1px solid #b7eb8f; color: #389e0d; padding: 12px 18px; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 14px;">
+    <i class="fas fa-check-circle" style="font-size: 18px;"></i>
+    <span><%= success %></span>
+  </div>
+<% } %>
+
 <div class="admin-card">
   <form action="<%= item ? '/admin/gallery/edit/' + item.id : '/admin/gallery/add' %>" method="POST" enctype="multipart/form-data" class="admin-form">
     
     <div class="form-row">
       <div class="form-group col-8">
         <label for="title">Food Dish Name <span style="color: var(--admin-red);">*</span></label>
-        <input type="text" id="title" name="title" value="<%= item ? item.title : '' %>" placeholder="e.g. Pan-Seared Wild Sea Bass" required>
+        <input type="text" id="title" name="title" value="<%= item ? item.title : '' %>" placeholder="e.g. Creamy Truffle Fettuccine Alfredo, Minestrone Soup" required>
       </div>
 
       <div class="form-group col-4">
-        <label for="category">Category</label>
-        <div style="display: flex; gap: 8px;">
-          <select id="category" name="category" style="flex-grow: 1;">
-            <% categories.forEach(cat => { %>
-              <option value="<%= cat %>" <%= (item && item.category === cat) ? 'selected' : '' %>><%= cat %></option>
-            <% }) %>
-          </select>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <label for="category" style="margin-bottom: 0;">Category <span style="color: var(--admin-red);">*</span></label>
+          <a href="#" id="quickAddCatBtn" style="font-size: 11px; text-transform: uppercase; color: var(--admin-blue); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+            <i class="fas fa-plus"></i> Add New
+          </a>
         </div>
+        <select id="category" name="category" required style="width: 100%;">
+          <% categories.forEach(cat => { %>
+            <option value="<%= cat %>" <%= (item && (item.category === cat || item.category.toLowerCase() === cat.toLowerCase())) ? 'selected' : '' %>><%= cat %></option>
+          <% }) %>
+        </select>
       </div>
     </div>
 
@@ -32,26 +49,28 @@
         <label for="galleryImage">Upload Food Picture</label>
         <input type="file" id="galleryImage" name="image" accept="image/*" class="crop-input" data-aspect="1.3333" data-preview="#galleryPreviewImg">
         <small class="form-help">
-          Upload dish photo (JPEG, PNG, WebP). An interactive crop editor allows framing before upload.
+          Upload dish photo (JPEG, PNG, WebP, AVIF, JFIF, HEIC). An interactive crop editor allows framing before upload.
         </small>
 
         <div style="margin-top: 15px;">
-          <label for="imageUrl" style="font-size: 12px; color: var(--admin-text-secondary);">Or paste an Image Web URL (optional):</label>
-          <input type="text" id="imageUrl" name="imageUrl" value="<%= (item && item.image && !item.image.startsWith('/uploads/')) ? item.image : '' %>" placeholder="https://example.com/food-dish.jpg">
+          <label for="imageUrl" style="font-size: 12px; color: var(--admin-text-secondary); font-weight: 600;">Or paste an Image Web URL (optional):</label>
+          <input type="text" id="imageUrl" name="imageUrl" value="<%= (item && item.image && !item.image.startsWith('/uploads/')) ? item.image : '' %>" placeholder="https://images.unsplash.com/... or https://example.com/pasta.jpg">
+          <small class="form-help" style="margin-top: 3px;">Direct web link to high-resolution food image.</small>
         </div>
       </div>
 
       <div class="form-group col-4">
         <label>Photo Preview</label>
-        <div style="margin-top: 5px; text-align: center; background: #fafafa; border: 1px dashed var(--admin-border-color); border-radius: 8px; padding: 10px; min-height: 160px; display: flex; align-items: center; justify-content: center;">
+        <div style="margin-top: 5px; text-align: center; background: #fafafa; border: 1px dashed var(--admin-border-color); border-radius: 8px; padding: 10px; min-height: 160px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
           <img id="galleryPreviewImg" src="<%= item ? item.image : '/images/default-food.jpg' %>" alt="Preview" onerror="this.onerror=null;this.src='/images/default-food.jpg';" style="max-width: 100%; max-height: 140px; border-radius: 6px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <small id="previewStatus" style="display: block; font-size: 10px; color: #888; margin-top: 6px;">Live dish preview</small>
         </div>
       </div>
     </div>
 
     <div class="form-group">
-      <label for="description">Dish Description / Caption (Optional)</label>
-      <textarea id="description" name="description" rows="4" placeholder="Briefly describe the ingredients, culinary preparation, or plating notes..."><%= item ? item.description : '' %></textarea>
+      <label for="description">Dish Description / Plating Notes (Optional)</label>
+      <textarea id="description" name="description" rows="4" placeholder="Briefly describe the key ingredients, taste notes, or culinary presentation..."><%= item ? item.description : '' %></textarea>
     </div>
 
     <div style="margin-top: 30px; display: flex; gap: 15px;">
@@ -61,6 +80,73 @@
 
   </form>
 </div>
+
+<script>
+  // Live preview for Image Web URL
+  const imageUrlInput = document.getElementById('imageUrl');
+  const previewImg = document.getElementById('galleryPreviewImg');
+  const fileInput = document.getElementById('galleryImage');
+
+  if (imageUrlInput) {
+    imageUrlInput.addEventListener('input', function() {
+      const val = this.value.trim();
+      if (val) {
+        previewImg.src = val;
+      } else if (fileInput && fileInput.files && fileInput.files[0]) {
+        previewImg.src = URL.createObjectURL(fileInput.files[0]);
+      } else {
+        previewImg.src = '<%= (item && item.image) ? item.image : "/images/default-food.jpg" %>';
+      }
+    });
+  }
+
+  // Quick Add Category Modal / Prompt
+  const quickAddBtn = document.getElementById('quickAddCatBtn');
+  if (quickAddBtn) {
+    quickAddBtn.addEventListener('click', async function(e) {
+      e.preventDefault();
+      const newCategory = prompt("Enter new category name (e.g. Pasta, Soups, Desserts):");
+      if (!newCategory || !newCategory.trim()) return;
+
+      const cleanCat = newCategory.trim();
+      try {
+        const response = await fetch('/admin/categories/add-json', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: cleanCat })
+        });
+        const data = await response.json();
+        
+        const select = document.getElementById('category');
+        // Check if option already exists
+        let exists = false;
+        for (let opt of select.options) {
+          if (opt.value.toLowerCase() === cleanCat.toLowerCase()) {
+            opt.selected = true;
+            exists = true;
+            break;
+          }
+        }
+        if (!exists) {
+          const opt = document.createElement('option');
+          opt.value = cleanCat;
+          opt.textContent = cleanCat;
+          opt.selected = true;
+          select.appendChild(opt);
+        }
+        alert(`Category "${cleanCat}" is ready!`);
+      } catch (err) {
+        // Fallback: just add to select element
+        const select = document.getElementById('category');
+        const opt = document.createElement('option');
+        opt.value = cleanCat;
+        opt.textContent = cleanCat;
+        opt.selected = true;
+        select.appendChild(opt);
+      }
+    });
+  }
+</script>
 
 </main>
 </div>

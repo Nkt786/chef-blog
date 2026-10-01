@@ -108,21 +108,77 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+    let ext = path.extname(file.originalname || '').toLowerCase();
+    if (!ext || ext === '.') {
+      ext = '.jpg';
+    } else if (ext === '.jpeg' || ext === '.jfif') {
+      ext = '.jpg';
+    }
+    cb(null, uniqueSuffix + ext);
   }
 });
+
 const upload = multer({ 
   storage: storage,
+  limits: {
+    fileSize: 15 * 1024 * 1024 // 15MB max file size
+  },
   fileFilter: (req, file, cb) => {
-    const filetypes = /jpeg|jpg|png|webp|gif/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
-    if (mimetype && extname) {
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    const allowedExts = /^\.(jpe?g|png|webp|gif|jfif|avif|heic|heif|bmp|svg|tiff)$/i;
+    const isImageExt = allowedExts.test(ext);
+    const isImageMime = file.mimetype && (
+      file.mimetype.startsWith('image/') ||
+      /jpeg|jpg|png|webp|gif|jfif|avif|heic|heif|bmp|svg/i.test(file.mimetype)
+    );
+
+    if (isImageExt || isImageMime) {
       return cb(null, true);
     }
-    cb(new Error('Only images (jpg, png, webp, gif) are allowed!'));
+    cb(new Error('Invalid file format. Please upload an image file (JPG, PNG, WebP, GIF, JFIF, AVIF, HEIC, etc.)'));
   }
 });
+
+// Safe upload wrapper middleware to prevent 500 crashes
+function safeUpload(fieldName) {
+  const single = upload.single(fieldName);
+  return (req, res, next) => {
+    single(req, res, (err) => {
+      if (err) {
+        console.error(`Upload error on field "${fieldName}":`, err.message);
+        req.uploadError = err.message || 'Image upload failed';
+      }
+      next();
+    });
+  };
+}
+
+// Safe upload for multiple/any files
+function safeUploadAny() {
+  const anyUpload = upload.any();
+  return (req, res, next) => {
+    anyUpload(req, res, (err) => {
+      if (err) {
+        console.error('Upload error (any):', err.message);
+        req.uploadError = err.message || 'Image upload failed';
+      }
+      next();
+    });
+  };
+}
+
+// Category matching helper to handle case and singular/plural differences
+function matchCategory(dishCat, filterCat) {
+  if (!dishCat || !filterCat) return false;
+  const d = dishCat.trim().toLowerCase();
+  const f = filterCat.trim().toLowerCase();
+  if (f === 'all') return true;
+  if (d === f) return true;
+  // Handle singular vs plural matching (e.g. Soup == Soups, Vegetable == Vegetables, Pasta == Pastas)
+  if (d + 's' === f || f + 's' === d) return true;
+  if (d.replace(/s$/, '') === f.replace(/s$/, '')) return true;
+  return false;
+}
 
 // Authentication middleware
 function checkAuth(req, res, next) {
@@ -273,29 +329,54 @@ app.get('/journey', async (req, res) => {
 // 5. Food Gallery Listing Page
 app.get('/gallery', async (req, res) => {
   let gallery = await db.get('gallery');
-  if (!gallery || gallery.length === 0) {
-    const recipes = await db.get('recipes');
-    gallery = recipes.map(r => ({
-      id: r.id,
-      title: r.title,
-      image: (r.images && r.images.length > 0) ? r.images[0] : '/images/default-food.jpg',
-      category: r.category || 'Specialty',
-      description: r.description || '',
-      date: r.date
-    }));
-  }
+  
+  // Merge any recipes (like Pasta) if not yet in gallery collection
+  const recipes = await db.get('recipes');
+  const galleryTitles = new Set(gallery.map(g => (g.title || '').trim().toLowerCase()));
+
+  recipes.forEach(r => {
+    if (r.title && !galleryTitles.has(r.title.trim().toLowerCase())) {
+      gallery.push({
+        id: r.id,
+        title: r.title,
+        image: (r.images && r.images.length > 0) ? r.images[0] : '/images/default-food.jpg',
+        category: r.category || 'Specialty',
+        description: r.description || '',
+        date: r.date
+      });
+      galleryTitles.add(r.title.trim().toLowerCase());
+    }
+  });
 
   const categoryFilter = req.query.category || 'All';
   
   // Load categories dynamically
   const dbCategories = await db.get('categories');
-  const catNames = new Set(dbCategories.map(c => c.name));
-  gallery.forEach(g => { if (g.category) catNames.add(g.category); });
-  const categories = Array.from(catNames);
+  const catNames = new Set();
+  
+  // Standard prioritized categories so essential categories are always visible
+  const priorityCats = ['Vegetables', 'Pasta', 'Soups', 'Salads', 'Fish', 'Chicken', 'Seafood', 'Dessert', 'Beef', 'Lamb'];
+  
+  // Add from DB
+  dbCategories.forEach(c => { if (c.name) catNames.add(c.name.trim()); });
+  // Add from dishes
+  gallery.forEach(g => { if (g.category) catNames.add(g.category.trim()); });
+  // Add priority categories
+  priorityCats.forEach(c => catNames.add(c));
+
+  // Deduplicate singular/plural equivalents in display tabs
+  const allCatList = Array.from(catNames);
+  const categories = [];
+  allCatList.forEach(cat => {
+    const alreadyPresent = categories.some(existing => matchCategory(existing, cat));
+    if (!alreadyPresent) {
+      categories.push(cat);
+    }
+  });
 
   let filteredGallery = gallery;
   if (categoryFilter !== 'All') {
-    filteredGallery = gallery.filter(r => r.category && r.category.toLowerCase() === categoryFilter.toLowerCase());
+    filteredGallery = gallery.filter(r => matchCategory(r.category, categoryFilter));
   }
 
   // Sort by date desc
@@ -304,7 +385,8 @@ app.get('/gallery', async (req, res) => {
   res.render('gallery', { 
     gallery: filteredGallery, 
     categories, 
-    selectedCategory: categoryFilter 
+    selectedCategory: categoryFilter,
+    matchCategory
   });
 });
 
@@ -434,8 +516,12 @@ app.get('/admin/blogs/add', checkAuth, (req, res) => {
   res.render('admin/blogs-form', { blog: null });
 });
 
-app.post('/admin/blogs/add', checkAuth, upload.single('image'), async (req, res) => {
+app.post('/admin/blogs/add', checkAuth, safeUpload('image'), async (req, res) => {
   try {
+    if (req.uploadError) {
+      return res.redirect(`/admin/blogs/add?error=${encodeURIComponent(req.uploadError)}`);
+    }
+
     const { title, excerpt, content, year, published, imageUrl } = req.body;
     let image = '/images/default-food.jpg';
     
@@ -464,11 +550,15 @@ app.post('/admin/blogs/add', checkAuth, upload.single('image'), async (req, res)
 app.get('/admin/blogs/edit/:id', checkAuth, async (req, res) => {
   const blog = await db.getById('blogs', req.params.id);
   if (!blog) return res.redirect('/admin/blogs');
-  res.render('admin/blogs-form', { blog });
+  res.render('admin/blogs-form', { blog, error: req.query.error });
 });
 
-app.post('/admin/blogs/edit/:id', checkAuth, upload.single('image'), async (req, res) => {
+app.post('/admin/blogs/edit/:id', checkAuth, safeUpload('image'), async (req, res) => {
   try {
+    if (req.uploadError) {
+      return res.redirect(`/admin/blogs/edit/${req.params.id}?error=${encodeURIComponent(req.uploadError)}`);
+    }
+
     const blog = await db.getById('blogs', req.params.id);
     if (!blog) return res.redirect('/admin/blogs');
 
@@ -517,17 +607,23 @@ app.get('/admin/gallery', checkAuth, async (req, res) => {
     }));
   }
   gallery.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
-  res.render('admin/gallery', { gallery });
+  res.render('admin/gallery', { gallery, error: req.query.error, success: req.query.success });
 });
 
 app.get('/admin/gallery/add', checkAuth, async (req, res) => {
   const dbCategories = await db.get('categories');
-  const categories = dbCategories.map(c => c.name);
-  res.render('admin/gallery-form', { item: null, categories });
+  const catNames = new Set(dbCategories.map(c => c.name.trim()));
+  ['Pasta', 'Soups', 'Vegetables', 'Salads', 'Fish', 'Chicken', 'Dessert', 'Seafood'].forEach(c => catNames.add(c));
+  const categories = Array.from(catNames);
+  res.render('admin/gallery-form', { item: null, categories, error: req.query.error, success: req.query.success });
 });
 
-app.post('/admin/gallery/add', checkAuth, upload.single('image'), async (req, res) => {
+app.post('/admin/gallery/add', checkAuth, safeUpload('image'), async (req, res) => {
   try {
+    if (req.uploadError) {
+      return res.redirect(`/admin/gallery/add?error=${encodeURIComponent(req.uploadError)}`);
+    }
+
     const { title, category, description, imageUrl } = req.body;
     let image = '/images/default-food.jpg';
 
@@ -538,16 +634,26 @@ app.post('/admin/gallery/add', checkAuth, upload.single('image'), async (req, re
       image = imageUrl.trim();
     }
 
+    // Auto-save category to database if not present
+    if (category && category.trim().length > 0) {
+      const cleanCat = category.trim();
+      const existingCats = await db.get('categories');
+      const alreadyHas = existingCats.some(c => matchCategory(c.name, cleanCat));
+      if (!alreadyHas) {
+        await db.insert('categories', { name: cleanCat });
+      }
+    }
+
     await db.insert('gallery', {
       title: title ? title.trim() : 'Untitled Dish',
-      category: category || 'Signature',
+      category: category ? category.trim() : 'Signature',
       description: description ? description.trim() : '',
       image
     });
-    res.redirect('/admin/gallery');
+    res.redirect('/admin/gallery?success=Food+dish+added+successfully+to+gallery');
   } catch (err) {
     console.error('Error adding gallery dish:', err);
-    res.redirect('/admin/gallery');
+    res.redirect(`/admin/gallery/add?error=${encodeURIComponent(err.message || 'Failed to add dish')}`);
   }
 });
 
@@ -566,21 +672,43 @@ app.get('/admin/gallery/edit/:id', checkAuth, async (req, res) => {
       };
     }
   }
-  if (!item) return res.redirect('/admin/gallery');
+  if (!item) return res.redirect('/admin/gallery?error=Dish+not+found');
+  
   const dbCategories = await db.get('categories');
-  const categories = dbCategories.map(c => c.name);
-  res.render('admin/gallery-form', { item, categories });
+  const catNames = new Set(dbCategories.map(c => c.name.trim()));
+  ['Pasta', 'Soups', 'Vegetables', 'Salads', 'Fish', 'Chicken', 'Dessert', 'Seafood'].forEach(c => catNames.add(c));
+  if (item.category) catNames.add(item.category.trim());
+  const categories = Array.from(catNames);
+  res.render('admin/gallery-form', { item, categories, error: req.query.error, success: req.query.success });
 });
 
-app.post('/admin/gallery/edit/:id', checkAuth, upload.single('image'), async (req, res) => {
+app.post('/admin/gallery/edit/:id', checkAuth, safeUpload('image'), async (req, res) => {
   try {
+    if (req.uploadError) {
+      return res.redirect(`/admin/gallery/edit/${req.params.id}?error=${encodeURIComponent(req.uploadError)}`);
+    }
+
     let item = await db.getById('gallery', req.params.id);
+    if (!item) {
+      const recipe = await db.getById('recipes', req.params.id);
+      if (recipe) {
+        item = {
+          id: recipe.id,
+          title: recipe.title,
+          image: (recipe.images && recipe.images.length > 0) ? recipe.images[0] : '/images/default-food.jpg',
+          category: recipe.category || 'Specialty',
+          description: recipe.description || ''
+        };
+      }
+    }
+
     const { title, category, description, imageUrl } = req.body;
 
     const updateData = {
       title: title ? title.trim() : (item ? item.title : 'Untitled Dish'),
-      category: category || (item ? item.category : 'Signature'),
-      description: description !== undefined ? description.trim() : (item ? item.description : '')
+      category: category ? category.trim() : (item ? item.category : 'Signature'),
+      description: description !== undefined ? description.trim() : (item ? item.description : ''),
+      image: item ? item.image : '/images/default-food.jpg'
     };
 
     if (req.file) {
@@ -590,27 +718,40 @@ app.post('/admin/gallery/edit/:id', checkAuth, upload.single('image'), async (re
       updateData.image = imageUrl.trim();
     }
 
-    if (item) {
+    // Auto-save category to database if not present
+    if (category && category.trim().length > 0) {
+      const cleanCat = category.trim();
+      const existingCats = await db.get('categories');
+      const alreadyHas = existingCats.some(c => matchCategory(c.name, cleanCat));
+      if (!alreadyHas) {
+        await db.insert('categories', { name: cleanCat });
+      }
+    }
+
+    const inGallery = await db.getById('gallery', req.params.id);
+    if (inGallery) {
       await db.update('gallery', req.params.id, updateData);
     } else {
       await db.insert('gallery', { id: req.params.id, ...updateData });
     }
-    res.redirect('/admin/gallery');
+    res.redirect('/admin/gallery?success=Food+dish+updated+successfully');
   } catch (err) {
     console.error('Error editing gallery dish:', err);
-    res.redirect('/admin/gallery');
+    res.redirect(`/admin/gallery/edit/${req.params.id}?error=${encodeURIComponent(err.message || 'Failed to update dish')}`);
   }
 });
 
 app.post('/admin/gallery/delete/:id', checkAuth, async (req, res) => {
   await db.delete('gallery', req.params.id);
   await db.delete('recipes', req.params.id);
-  res.redirect('/admin/gallery');
+  res.redirect('/admin/gallery?success=Food+dish+deleted');
 });
 
-// Admin recipes backward compatibility redirects
+// Admin recipes backward compatibility redirects & POST handlers
 app.get('/admin/recipes', (req, res) => res.redirect('/admin/gallery'));
 app.get('/admin/recipes/*', (req, res) => res.redirect('/admin/gallery'));
+app.post('/admin/recipes/add', checkAuth, safeUpload('image'), (req, res) => res.redirect('/admin/gallery'));
+app.post('/admin/recipes/edit/:id', checkAuth, safeUpload('image'), (req, res) => res.redirect('/admin/gallery'));
 
 
 // --- ADMIN: RECIPES CATEGORIES ---
@@ -694,7 +835,7 @@ app.get('/admin/sustainability', checkAuth, async (req, res) => {
   res.render('admin/sustainability', { blocks: sustainability });
 });
 
-app.post('/admin/sustainability/add', checkAuth, upload.single('image'), async (req, res) => {
+app.post('/admin/sustainability/add', checkAuth, safeUpload('image'), async (req, res) => {
   const { title, content } = req.body;
   let image = '/images/default-sustainability.jpg';
   if (req.file) {
@@ -705,7 +846,7 @@ app.post('/admin/sustainability/add', checkAuth, upload.single('image'), async (
   res.redirect('/admin/sustainability');
 });
 
-app.post('/admin/sustainability/edit/:id', checkAuth, upload.single('image'), async (req, res) => {
+app.post('/admin/sustainability/edit/:id', checkAuth, safeUpload('image'), async (req, res) => {
   const { title, content } = req.body;
   const updateData = { title, content };
   if (req.file) {
@@ -727,7 +868,7 @@ app.get('/admin/media', checkAuth, async (req, res) => {
   try {
     let diskFiles = [];
     if (fs.existsSync(uploadDir)) {
-      diskFiles = fs.readdirSync(uploadDir).filter(file => /\.(jpg|jpeg|png|webp|gif)$/i.test(file));
+      diskFiles = fs.readdirSync(uploadDir).filter(file => /\.(jpg|jpeg|png|webp|gif|jfif|avif|heic|bmp|svg)$/i.test(file));
     }
     const dbFilenames = await db.getAllMediaFilenames();
     const allFiles = Array.from(new Set([...diskFiles, ...dbFilenames]));
@@ -738,7 +879,7 @@ app.get('/admin/media', checkAuth, async (req, res) => {
   }
 });
 
-app.post('/admin/media/upload', checkAuth, upload.single('mediafile'), async (req, res) => {
+app.post('/admin/media/upload', checkAuth, safeUpload('mediafile'), async (req, res) => {
   if (req.file) {
     await persistUploadedFile(req.file);
   }
@@ -789,8 +930,111 @@ app.post('/admin/newsletter/delete/:id', checkAuth, async (req, res) => {
 });
 
 
+// --- ADMIN: HOMEPAGE PHOTOS & CONTENT ---
+app.get('/admin/homepage', checkAuth, async (req, res) => {
+  const settings = await db.getSettings();
+  res.render('admin/homepage', {
+    settings,
+    error: req.query.error,
+    success: req.query.success
+  });
+});
+
+app.post('/admin/homepage', checkAuth, safeUploadAny(), async (req, res) => {
+  try {
+    if (req.uploadError) {
+      return res.redirect(`/admin/homepage?error=${encodeURIComponent(req.uploadError)}`);
+    }
+
+    const {
+      // 3 Showcase Photos
+      showcaseTitle1, showcaseImage1Url,
+      showcaseTitle2, showcaseImage2Url,
+      showcaseTitle3, showcaseImage3Url,
+
+      // 3 Hero Slides
+      heroSlide1Title, heroSlide1Url,
+      heroSlide2Title, heroSlide2Url,
+      heroSlide3Title, heroSlide3Url,
+
+      // Hero Content
+      heroTag, heroTitle, heroDescription, heroBtnText, heroBtnLink,
+
+      // Intro Section
+      introTitle, introQuote, introText, introSignature,
+
+      // Chef Widget
+      chefWidgetTitle, chefWidgetIntro, chefWidgetImageUrl
+    } = req.body;
+
+    const updateData = {};
+
+    if (showcaseTitle1 !== undefined) updateData.showcaseTitle1 = showcaseTitle1.trim();
+    if (showcaseTitle2 !== undefined) updateData.showcaseTitle2 = showcaseTitle2.trim();
+    if (showcaseTitle3 !== undefined) updateData.showcaseTitle3 = showcaseTitle3.trim();
+
+    if (heroSlide1Title !== undefined) updateData.heroSlide1Title = heroSlide1Title.trim();
+    if (heroSlide2Title !== undefined) updateData.heroSlide2Title = heroSlide2Title.trim();
+    if (heroSlide3Title !== undefined) updateData.heroSlide3Title = heroSlide3Title.trim();
+
+    if (heroTag !== undefined) updateData.heroTag = heroTag.trim();
+    if (heroTitle !== undefined) updateData.heroTitle = heroTitle.trim();
+    if (heroDescription !== undefined) updateData.heroDescription = heroDescription.trim();
+    if (heroBtnText !== undefined) updateData.heroBtnText = heroBtnText.trim();
+    if (heroBtnLink !== undefined) updateData.heroBtnLink = heroBtnLink.trim();
+
+    if (introTitle !== undefined) updateData.introTitle = introTitle.trim();
+    if (introQuote !== undefined) updateData.introQuote = introQuote.trim();
+    if (introText !== undefined) updateData.introText = introText.trim();
+    if (introSignature !== undefined) updateData.introSignature = introSignature.trim();
+
+    if (chefWidgetTitle !== undefined) updateData.chefWidgetTitle = chefWidgetTitle.trim();
+    if (chefWidgetIntro !== undefined) updateData.chefWidgetIntro = chefWidgetIntro.trim();
+
+    // Process all uploaded files
+    if (req.files && Array.isArray(req.files)) {
+      for (const file of req.files) {
+        await persistUploadedFile(file);
+        updateData[file.fieldname] = `/uploads/${file.filename}`;
+      }
+    }
+
+    // Process Web URLs when no new file is uploaded for that specific field
+    if (!updateData.showcaseImage1 && showcaseImage1Url && showcaseImage1Url.trim()) {
+      updateData.showcaseImage1 = showcaseImage1Url.trim();
+    }
+    if (!updateData.showcaseImage2 && showcaseImage2Url && showcaseImage2Url.trim()) {
+      updateData.showcaseImage2 = showcaseImage2Url.trim();
+    }
+    if (!updateData.showcaseImage3 && showcaseImage3Url && showcaseImage3Url.trim()) {
+      updateData.showcaseImage3 = showcaseImage3Url.trim();
+    }
+
+    if (!updateData.heroSlide1 && heroSlide1Url && heroSlide1Url.trim()) {
+      updateData.heroSlide1 = heroSlide1Url.trim();
+    }
+    if (!updateData.heroSlide2 && heroSlide2Url && heroSlide2Url.trim()) {
+      updateData.heroSlide2 = heroSlide2Url.trim();
+    }
+    if (!updateData.heroSlide3 && heroSlide3Url && heroSlide3Url.trim()) {
+      updateData.heroSlide3 = heroSlide3Url.trim();
+    }
+
+    if (!updateData.chefWidgetImage && chefWidgetImageUrl && chefWidgetImageUrl.trim()) {
+      updateData.chefWidgetImage = chefWidgetImageUrl.trim();
+    }
+
+    await db.updateSettings(updateData);
+    res.redirect('/admin/homepage?success=Homepage+photos+and+content+saved+successfully');
+  } catch (err) {
+    console.error('Error updating homepage photos/content:', err);
+    res.redirect(`/admin/homepage?error=${encodeURIComponent(err.message || 'Failed to save homepage changes')}`);
+  }
+});
+
+
 // --- ADMIN: SETTINGS ---
-app.post('/admin/settings', checkAuth, upload.single('chefImage'), async (req, res) => {
+app.post('/admin/settings', checkAuth, safeUploadAny(), async (req, res) => {
   const { 
     brandName, shortDescription, tagline, adminPassword,
     galleryHeading, gallerySubtitle,
@@ -810,7 +1054,16 @@ app.post('/admin/settings', checkAuth, upload.single('chefImage'), async (req, r
     aboutSpecialty3Title, aboutSpecialty3Desc,
     aboutSpecialty4Title, aboutSpecialty4Desc,
     contactIntroTitle, contactIntroText,
-    contactNewsletterTitle, contactNewsletterText
+    contactNewsletterTitle, contactNewsletterText,
+
+    // Homepage fields if posted here
+    showcaseTitle1, showcaseImage1Url,
+    showcaseTitle2, showcaseImage2Url,
+    showcaseTitle3, showcaseImage3Url,
+    heroSlide1Title, heroSlide1Url,
+    heroSlide2Title, heroSlide2Url,
+    heroSlide3Title, heroSlide3Url,
+    heroTag, heroTitle, heroDescription
   } = req.body;
   
   const updateData = { 
@@ -837,10 +1090,31 @@ app.post('/admin/settings', checkAuth, upload.single('chefImage'), async (req, r
     contactNewsletterTitle, contactNewsletterText
   };
 
-  if (req.file) {
-    updateData.chefImage = `/uploads/${req.file.filename}`;
-    await persistUploadedFile(req.file);
+  if (showcaseTitle1 !== undefined) updateData.showcaseTitle1 = showcaseTitle1;
+  if (showcaseTitle2 !== undefined) updateData.showcaseTitle2 = showcaseTitle2;
+  if (showcaseTitle3 !== undefined) updateData.showcaseTitle3 = showcaseTitle3;
+  if (heroSlide1Title !== undefined) updateData.heroSlide1Title = heroSlide1Title;
+  if (heroSlide2Title !== undefined) updateData.heroSlide2Title = heroSlide2Title;
+  if (heroSlide3Title !== undefined) updateData.heroSlide3Title = heroSlide3Title;
+  if (heroTag !== undefined) updateData.heroTag = heroTag;
+  if (heroTitle !== undefined) updateData.heroTitle = heroTitle;
+  if (heroDescription !== undefined) updateData.heroDescription = heroDescription;
+
+  // Process all files
+  if (req.files && Array.isArray(req.files)) {
+    for (const file of req.files) {
+      await persistUploadedFile(file);
+      updateData[file.fieldname] = `/uploads/${file.filename}`;
+    }
   }
+
+  // Handle URL fallbacks
+  if (!updateData.showcaseImage1 && showcaseImage1Url && showcaseImage1Url.trim()) updateData.showcaseImage1 = showcaseImage1Url.trim();
+  if (!updateData.showcaseImage2 && showcaseImage2Url && showcaseImage2Url.trim()) updateData.showcaseImage2 = showcaseImage2Url.trim();
+  if (!updateData.showcaseImage3 && showcaseImage3Url && showcaseImage3Url.trim()) updateData.showcaseImage3 = showcaseImage3Url.trim();
+  if (!updateData.heroSlide1 && heroSlide1Url && heroSlide1Url.trim()) updateData.heroSlide1 = heroSlide1Url.trim();
+  if (!updateData.heroSlide2 && heroSlide2Url && heroSlide2Url.trim()) updateData.heroSlide2 = heroSlide2Url.trim();
+  if (!updateData.heroSlide3 && heroSlide3Url && heroSlide3Url.trim()) updateData.heroSlide3 = heroSlide3Url.trim();
 
   if (adminPassword && adminPassword.trim().length > 0) {
     updateData.adminPassword = adminPassword;
@@ -852,7 +1126,51 @@ app.post('/admin/settings', checkAuth, upload.single('chefImage'), async (req, r
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).send('Page Not Found');
+  res.status(404).render('maintenance', {
+    message: 'The page you are looking for does not exist.'
+  });
+});
+
+// Global application error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Unhandled Application Error:', err);
+  if (res.headersSent) {
+    return next(err);
+  }
+  
+  const isUpload = err instanceof multer.MulterError || (err.message && /image|upload|file/i.test(err.message));
+  const userMessage = isUpload ? err.message : 'An unexpected error occurred while processing your request.';
+
+  if (req.originalUrl && req.originalUrl.startsWith('/admin')) {
+    return res.status(isUpload ? 400 : 500).send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Notice | Chef Admin</title>
+        <link rel="stylesheet" href="/css/admin.css">
+        <style>
+          body { display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; padding: 20px; }
+          .error-card { background: #fff; padding: 40px; border-radius: 8px; max-width: 520px; width: 100%; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-top: 5px solid #e53e3e; }
+          h2 { color: #1e293b; margin-top: 0; margin-bottom: 12px; font-size: 22px; }
+          p { color: #64748b; margin-bottom: 25px; line-height: 1.6; font-size: 15px; }
+          .btn-back { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: #1b2838; color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; transition: background 0.2s; }
+          .btn-back:hover { background: #2c3e50; }
+        </style>
+      </head>
+      <body>
+        <div class="error-card">
+          <h2>⚠️ Action Could Not Be Completed</h2>
+          <p>${userMessage}</p>
+          <a href="javascript:history.back()" class="btn-back">← Go Back & Try Again</a>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+
+  res.status(500).send('Something went wrong. Please try again later.');
 });
 
 // Start Server

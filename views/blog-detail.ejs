@@ -25,8 +25,8 @@
       <div class="blog-detail-footer">
         <div class="blog-share">
           <span>Share:</span>
-          <a href="https://wa.me/?text=<%= encodeURIComponent(blog.title + ' - http://localhost:3000/blog/' + blog.id) %>" target="_blank" title="Share on WhatsApp"><i class="fab fa-whatsapp"></i></a>
-          <a href="https://www.linkedin.com/sharing/share-offsite/?url=<%= encodeURIComponent('http://localhost:3000/blog/' + blog.id) %>" target="_blank" title="Share on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          <a href="https://wa.me/?text=<%= encodeURIComponent(blog.title + ' | Chef Nitesh Sharma') %>" target="_blank" title="Share on WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="https://www.linkedin.com/sharing/share-offsite/?url=" target="_blank" onclick="this.href='https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(window.location.href); return true;" title="Share on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
         </div>
         <a href="/blog" class="btn-back-blogs"><i class="fas fa-arrow-left"></i> Back to Blog Portfolio</a>
       </div>

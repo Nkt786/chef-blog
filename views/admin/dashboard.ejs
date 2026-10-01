@@ -41,6 +41,22 @@
 
 </div>
 
+<!-- Homepage Photos & Showcase Callout Card -->
+<div class="homepage-promo-banner" style="background: linear-gradient(135deg, #1b2838 0%, #243342 100%); color: #fff; padding: 22px 28px; border-radius: 8px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border-left: 5px solid #27ae60;">
+  <div style="display: flex; align-items: center; gap: 18px;">
+    <div style="width: 48px; height: 48px; border-radius: 8px; background: rgba(39, 174, 96, 0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; color: #2ecc71;">
+      <i class="fas fa-camera"></i>
+    </div>
+    <div>
+      <h3 style="margin: 0 0 4px; font-size: 16px; color: #fff; font-weight: 600;">Edit Homepage Photos & Banners</h3>
+      <p style="margin: 0; font-size: 13px; color: #cbd5e1;">Customize the 3 Hero slideshow photos, the 3 Featured Showcase photos, and homepage stories with your original pictures.</p>
+    </div>
+  </div>
+  <a href="/admin/homepage" class="btn-primary" style="background: #27ae60; color: #fff; text-decoration: none; padding: 11px 22px; border-radius: 6px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; border: none; box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);">
+    <i class="fas fa-edit"></i> EDIT HOMEPAGE PHOTOS
+  </a>
+</div>
+
 <!-- Settings Panel -->
 <div class="settings-panel">
   <div class="panel-header">
@@ -77,6 +93,21 @@
             <img id="chefPreviewImg" src="<%= settings.chefImage || '/images/chef-portrait.jpg' %>" alt="Chef Portrait Preview" onerror="this.onerror=null;this.src='/images/chef-portrait.jpg';" style="height: 85px; width: 68px; border-radius: 6px; border: 1px solid var(--admin-border-color); object-fit: cover; object-position: top center;">
           </div>
         </div>
+      </div>
+
+      <!-- Homepage Photos Quick Link Card -->
+      <div style="background: #f8fafc; border: 1px solid var(--admin-border-color); border-radius: 8px; padding: 16px 20px; margin: 25px 0 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-left: 4px solid #27ae60;">
+        <div>
+          <strong style="color: var(--admin-text-main); font-size: 14px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-camera" style="color: #27ae60;"></i> Homepage Photos (3 Hero Slides & 3 Showcase Photos)
+          </strong>
+          <span style="font-size: 12px; color: var(--admin-text-secondary); display: block; margin-top: 3px;">
+            Easily upload and crop the client's original food photos, showcase dishes, and hero banners.
+          </span>
+        </div>
+        <a href="/admin/homepage" class="btn-secondary" style="background: #27ae60; color: #fff; padding: 8px 16px; border-radius: 5px; font-size: 12px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+          <i class="fas fa-edit"></i> Edit Homepage Photos
+        </a>
       </div>
 
       <h3 style="margin: 25px 0 10px; font-size: 14px; border-bottom: 1px solid var(--admin-border-color); padding-bottom: 5px; color: var(--admin-text-main);">Page Headings & Subtitles</h3>

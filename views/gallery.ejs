@@ -14,9 +14,9 @@
 
     <!-- Categories Filter Tabs -->
     <div class="gallery-categories-tabs scroll-reveal">
-      <a href="/gallery" class="gallery-tab <%= selectedCategory === 'All' ? 'active' : '' %>">All Dishes</a>
+      <a href="/gallery" class="gallery-tab <%= (!selectedCategory || selectedCategory === 'All') ? 'active' : '' %>">All Dishes</a>
       <% categories.forEach(cat => { %>
-        <a href="/gallery?category=<%= encodeURIComponent(cat) %>" class="gallery-tab <%= selectedCategory === cat ? 'active' : '' %>"><%= cat %></a>
+        <a href="/gallery?category=<%= encodeURIComponent(cat) %>" class="gallery-tab <%= (typeof matchCategory === 'function' ? matchCategory(selectedCategory, cat) : (selectedCategory === cat)) ? 'active' : '' %>"><%= cat %></a>
       <% }) %>
     </div>
 

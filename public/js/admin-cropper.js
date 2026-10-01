@@ -136,11 +136,14 @@
       canvas.toBlob(blob => {
         if (!blob) return;
         
-        // Generate new file
-        const origName = currentFileInput.dataset.origName || 'cropped-image.jpg';
-        const fileExt = origName.split('.').pop() || 'jpg';
-        const newFile = new File([blob], origName.replace(/\.[^/.]+$/, "") + "-cropped." + fileExt, {
-          type: blob.type || 'image/jpeg',
+        // Generate new file - always standardize cropped output to .jpg
+        const rawName = currentFileInput.dataset.origName || 'food-photo';
+        const safeBase = rawName
+          .replace(/\.[^/.]+$/, '')
+          .replace(/[^a-zA-Z0-9_-]/g, '_')
+          .substring(0, 50) || 'dish';
+        const newFile = new File([blob], `${safeBase}-cropped.jpg`, {
+          type: 'image/jpeg',
           lastModified: Date.now()
         });
 
@@ -253,11 +256,16 @@
           return;
         }
 
-        // Determine default aspect ratio
-        let defaultAspect = 1.3333; // 4:3 for food
-        if (this.id === 'chefImage' || this.name === 'chefImage') {
+        // Determine default aspect ratio based on data-aspect attribute first
+        let defaultAspect = 1.3333; // 4:3 default for food dishes
+        const explicitAspect = parseFloat(this.getAttribute('data-aspect'));
+        if (!isNaN(explicitAspect) && explicitAspect > 0) {
+          defaultAspect = explicitAspect;
+        } else if (this.id === 'chefImage' || this.name === 'chefImage') {
           defaultAspect = 0.75; // 3:4 for portrait
-        } else if (this.id === 'blogImage' || this.name === 'image') {
+        } else if (this.id === 'galleryImage') {
+          defaultAspect = 1.3333; // 4:3 for food gallery
+        } else if (this.id === 'blogImage' || (this.name === 'image' && !this.id.includes('gallery'))) {
           defaultAspect = 1.7777; // 16:9 for blogs
         }
 

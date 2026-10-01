@@ -1,0 +1,429 @@
+<%- include('../partials/admin-nav') %>
+
+<div class="panel-header" style="margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
+  <div>
+    <h2><i class="fas fa-camera"></i> Homepage Photos & Content</h2>
+    <p>Upload your own original dish photos and customize all homepage banners and showcase sections</p>
+  </div>
+  <a href="/" target="_blank" class="btn-secondary" style="background: #2e3033; color: #fff; padding: 10px 18px; border-radius: 6px; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+    <i class="fas fa-external-link-alt"></i> View Live Homepage
+  </a>
+</div>
+
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="login-error" style="margin-bottom: 20px; background: #fff1f0; border: 1px solid #ffa39e; color: #cf1322; padding: 12px 18px; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 14px;">
+    <i class="fas fa-exclamation-circle" style="font-size: 18px;"></i>
+    <span><%= error %></span>
+  </div>
+<% } %>
+
+<% if (typeof success !== 'undefined' && success) { %>
+  <div class="login-success" style="margin-bottom: 20px; background: #f6ffed; border: 1px solid #b7eb8f; color: #389e0d; padding: 12px 18px; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 14px;">
+    <i class="fas fa-check-circle" style="font-size: 18px;"></i>
+    <span><%= success %></span>
+  </div>
+<% } %>
+
+<form action="/admin/homepage" method="POST" enctype="multipart/form-data" class="admin-form">
+
+  <!-- ========================================================
+       SECTION 1: 3 FEATURED SHOWCASE PHOTOS
+       ======================================================== -->
+  <div class="admin-card" style="margin-bottom: 30px; border-left: 4px solid #27ae60;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--admin-border-color); padding-bottom: 12px;">
+      <div>
+        <h3 style="margin: 0; font-size: 18px; color: var(--admin-text-main); display: flex; align-items: center; gap: 10px;">
+          <span style="background: #e8f8f0; color: #27ae60; width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">1</span>
+          Featured 3-Photo Showcase
+        </h3>
+        <p style="margin: 5px 0 0 40px; font-size: 13px; color: var(--admin-text-secondary);">
+          These 3 photos appear side-by-side on the homepage under the Signature Dishes section. Upload your original food and chef photos here.
+        </p>
+      </div>
+      <span class="badge" style="background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; text-transform: uppercase; font-weight: 600;">Homepage Showcase</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
+      
+      <!-- Showcase Photo 1 (Left) -->
+      <div style="background: #fafbfc; border: 1px solid var(--admin-border-color); border-radius: 8px; padding: 18px; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: var(--admin-text-main);">
+            <i class="fas fa-utensils" style="color: #27ae60; margin-right: 6px;"></i> Photo 1 (Left)
+          </h4>
+          <span style="font-size: 11px; color: #888;">Position: Left</span>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 15px; background: #fff; border: 1px solid var(--admin-border-color); border-radius: 6px; padding: 8px;">
+          <img id="previewShowcase1" src="<%= settings.showcaseImage1 || '/images/sea-bass.jpg' %>" alt="Showcase 1" onerror="this.onerror=null;this.src='/images/sea-bass.jpg';" style="width: 100%; height: 180px; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+          <small style="display: block; font-size: 11px; color: #666; margin-top: 6px;">Current Left Photo</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="showcaseTitle1" style="font-size: 12px; font-weight: 600;">Dish / Caption Title</label>
+          <input type="text" id="showcaseTitle1" name="showcaseTitle1" value="<%= settings.showcaseTitle1 || 'Pan-Seared Sea Bass' %>" placeholder="e.g. Pan-Seared Sea Bass">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="showcaseImage1" style="font-size: 12px; font-weight: 600;">Upload New Photo</label>
+          <input type="file" id="showcaseImage1" name="showcaseImage1" accept="image/*" class="crop-input" data-aspect="1" data-preview="#previewShowcase1">
+          <small class="form-help">Interactive crop tool opens automatically upon selecting image.</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="showcaseImage1Url" style="font-size: 11px; color: var(--admin-text-secondary);">Or Image Web URL:</label>
+          <input type="text" id="showcaseImage1Url" name="showcaseImage1Url" value="<%= (settings.showcaseImage1 && !settings.showcaseImage1.startsWith('/uploads/') && !settings.showcaseImage1.startsWith('/images/')) ? settings.showcaseImage1 : '' %>" placeholder="https://example.com/photo.jpg" class="live-url-input" data-target="#previewShowcase1">
+        </div>
+      </div>
+
+      <!-- Showcase Photo 2 (Center) -->
+      <div style="background: #fafbfc; border: 1px solid var(--admin-border-color); border-radius: 8px; padding: 18px; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: var(--admin-text-main);">
+            <i class="fas fa-user-tie" style="color: #2980b9; margin-right: 6px;"></i> Photo 2 (Center / Chef in Action)
+          </h4>
+          <span style="font-size: 11px; color: #888;">Position: Center</span>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 15px; background: #fff; border: 1px solid var(--admin-border-color); border-radius: 6px; padding: 8px;">
+          <img id="previewShowcase2" src="<%= settings.showcaseImage2 || settings.chefImage || '/images/chef-portrait.jpg' %>" alt="Showcase 2" onerror="this.onerror=null;this.src='/images/chef-portrait.jpg';" style="width: 100%; height: 180px; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+          <small style="display: block; font-size: 11px; color: #666; margin-top: 6px;">Current Center Photo</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="showcaseTitle2" style="font-size: 12px; font-weight: 600;">Dish / Caption Title</label>
+          <input type="text" id="showcaseTitle2" name="showcaseTitle2" value="<%= settings.showcaseTitle2 || 'Chef Nitesh Sharma' %>" placeholder="e.g. Chef Nitesh Sharma">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="showcaseImage2" style="font-size: 12px; font-weight: 600;">Upload New Photo</label>
+          <input type="file" id="showcaseImage2" name="showcaseImage2" accept="image/*" class="crop-input" data-aspect="1" data-preview="#previewShowcase2">
+          <small class="form-help">Upload photo or collage of the chef in action.</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="showcaseImage2Url" style="font-size: 11px; color: var(--admin-text-secondary);">Or Image Web URL:</label>
+          <input type="text" id="showcaseImage2Url" name="showcaseImage2Url" value="<%= (settings.showcaseImage2 && !settings.showcaseImage2.startsWith('/uploads/') && !settings.showcaseImage2.startsWith('/images/')) ? settings.showcaseImage2 : '' %>" placeholder="https://example.com/chef.jpg" class="live-url-input" data-target="#previewShowcase2">
+        </div>
+      </div>
+
+      <!-- Showcase Photo 3 (Right) -->
+      <div style="background: #fafbfc; border: 1px solid var(--admin-border-color); border-radius: 8px; padding: 18px; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: var(--admin-text-main);">
+            <i class="fas fa-fish" style="color: #e67e22; margin-right: 6px;"></i> Photo 3 (Right)
+          </h4>
+          <span style="font-size: 11px; color: #888;">Position: Right</span>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 15px; background: #fff; border: 1px solid var(--admin-border-color); border-radius: 6px; padding: 8px;">
+          <img id="previewShowcase3" src="<%= settings.showcaseImage3 || '/images/recipe-salmon.jpg' %>" alt="Showcase 3" onerror="this.onerror=null;this.src='/images/recipe-salmon.jpg';" style="width: 100%; height: 180px; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+          <small style="display: block; font-size: 11px; color: #666; margin-top: 6px;">Current Right Photo</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="showcaseTitle3" style="font-size: 12px; font-weight: 600;">Dish / Caption Title</label>
+          <input type="text" id="showcaseTitle3" name="showcaseTitle3" value="<%= settings.showcaseTitle3 || 'Herb Crusted Salmon' %>" placeholder="e.g. Herb Crusted Salmon">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="showcaseImage3" style="font-size: 12px; font-weight: 600;">Upload New Photo</label>
+          <input type="file" id="showcaseImage3" name="showcaseImage3" accept="image/*" class="crop-input" data-aspect="1" data-preview="#previewShowcase3">
+          <small class="form-help">Interactive crop tool opens automatically upon selecting image.</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="showcaseImage3Url" style="font-size: 11px; color: var(--admin-text-secondary);">Or Image Web URL:</label>
+          <input type="text" id="showcaseImage3Url" name="showcaseImage3Url" value="<%= (settings.showcaseImage3 && !settings.showcaseImage3.startsWith('/uploads/') && !settings.showcaseImage3.startsWith('/images/')) ? settings.showcaseImage3 : '' %>" placeholder="https://example.com/salmon.jpg" class="live-url-input" data-target="#previewShowcase3">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ========================================================
+       SECTION 2: 3 HERO SLIDESHOW PHOTOS
+       ======================================================== -->
+  <div class="admin-card" style="margin-bottom: 30px; border-left: 4px solid #3498db;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--admin-border-color); padding-bottom: 12px;">
+      <div>
+        <h3 style="margin: 0; font-size: 18px; color: var(--admin-text-main); display: flex; align-items: center; gap: 10px;">
+          <span style="background: #ebf5fb; color: #3498db; width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">2</span>
+          Hero Top Banner Slideshow Photos
+        </h3>
+        <p style="margin: 5px 0 0 40px; font-size: 13px; color: var(--admin-text-secondary);">
+          These 3 images continuously cross-fade on the homepage top hero banner next to "Crafting Stories on a Plate".
+        </p>
+      </div>
+      <span class="badge" style="background: #3498db; color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; text-transform: uppercase; font-weight: 600;">Hero Slideshow</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
+      
+      <!-- Hero Slide 1 -->
+      <div style="background: #fafbfc; border: 1px solid var(--admin-border-color); border-radius: 8px; padding: 18px; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: var(--admin-text-main);">
+            <i class="fas fa-layer-group" style="color: #3498db; margin-right: 6px;"></i> Hero Slide 1
+          </h4>
+          <span style="font-size: 11px; color: #888;">First Slide</span>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 15px; background: #fff; border: 1px solid var(--admin-border-color); border-radius: 6px; padding: 8px;">
+          <img id="previewHero1" src="<%= settings.heroSlide1 || '/images/recipe-salmon.jpg' %>" alt="Hero Slide 1" onerror="this.onerror=null;this.src='/images/recipe-salmon.jpg';" style="width: 100%; height: 160px; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+          <small style="display: block; font-size: 11px; color: #666; margin-top: 6px;">Slide 1 Preview</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="heroSlide1Title" style="font-size: 12px; font-weight: 600;">Dish Name / Alt Description</label>
+          <input type="text" id="heroSlide1Title" name="heroSlide1Title" value="<%= settings.heroSlide1Title || 'Mediterranean Herb Crusted Salmon' %>">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="heroSlide1" style="font-size: 12px; font-weight: 600;">Upload New Slide Photo</label>
+          <input type="file" id="heroSlide1" name="heroSlide1" accept="image/*" class="crop-input" data-aspect="1.3333" data-preview="#previewHero1">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="heroSlide1Url" style="font-size: 11px; color: var(--admin-text-secondary);">Or Slide 1 Web URL:</label>
+          <input type="text" id="heroSlide1Url" name="heroSlide1Url" value="<%= (settings.heroSlide1 && !settings.heroSlide1.startsWith('/uploads/') && !settings.heroSlide1.startsWith('/images/')) ? settings.heroSlide1 : '' %>" placeholder="https://example.com/hero1.jpg" class="live-url-input" data-target="#previewHero1">
+        </div>
+      </div>
+
+      <!-- Hero Slide 2 -->
+      <div style="background: #fafbfc; border: 1px solid var(--admin-border-color); border-radius: 8px; padding: 18px; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: var(--admin-text-main);">
+            <i class="fas fa-layer-group" style="color: #3498db; margin-right: 6px;"></i> Hero Slide 2
+          </h4>
+          <span style="font-size: 11px; color: #888;">Second Slide</span>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 15px; background: #fff; border: 1px solid var(--admin-border-color); border-radius: 6px; padding: 8px;">
+          <img id="previewHero2" src="<%= settings.heroSlide2 || '/images/sea-bass.jpg' %>" alt="Hero Slide 2" onerror="this.onerror=null;this.src='/images/sea-bass.jpg';" style="width: 100%; height: 160px; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+          <small style="display: block; font-size: 11px; color: #666; margin-top: 6px;">Slide 2 Preview</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="heroSlide2Title" style="font-size: 12px; font-weight: 600;">Dish Name / Alt Description</label>
+          <input type="text" id="heroSlide2Title" name="heroSlide2Title" value="<%= settings.heroSlide2Title || 'Pan-Seared Sea Bass with Caponata' %>">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="heroSlide2" style="font-size: 12px; font-weight: 600;">Upload New Slide Photo</label>
+          <input type="file" id="heroSlide2" name="heroSlide2" accept="image/*" class="crop-input" data-aspect="1.3333" data-preview="#previewHero2">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="heroSlide2Url" style="font-size: 11px; color: var(--admin-text-secondary);">Or Slide 2 Web URL:</label>
+          <input type="text" id="heroSlide2Url" name="heroSlide2Url" value="<%= (settings.heroSlide2 && !settings.heroSlide2.startsWith('/uploads/') && !settings.heroSlide2.startsWith('/images/')) ? settings.heroSlide2 : '' %>" placeholder="https://example.com/hero2.jpg" class="live-url-input" data-target="#previewHero2">
+        </div>
+      </div>
+
+      <!-- Hero Slide 3 -->
+      <div style="background: #fafbfc; border: 1px solid var(--admin-border-color); border-radius: 8px; padding: 18px; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: var(--admin-text-main);">
+            <i class="fas fa-layer-group" style="color: #3498db; margin-right: 6px;"></i> Hero Slide 3
+          </h4>
+          <span style="font-size: 11px; color: #888;">Third Slide</span>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 15px; background: #fff; border: 1px solid var(--admin-border-color); border-radius: 6px; padding: 8px;">
+          <img id="previewHero3" src="<%= settings.heroSlide3 || '/images/truffle-chicken.jpg' %>" alt="Hero Slide 3" onerror="this.onerror=null;this.src='/images/truffle-chicken.jpg';" style="width: 100%; height: 160px; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+          <small style="display: block; font-size: 11px; color: #666; margin-top: 6px;">Slide 3 Preview</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="heroSlide3Title" style="font-size: 12px; font-weight: 600;">Dish Name / Alt Description</label>
+          <input type="text" id="heroSlide3Title" name="heroSlide3Title" value="<%= settings.heroSlide3Title || 'Truffle Butter Roasted Chicken' %>">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="heroSlide3" style="font-size: 12px; font-weight: 600;">Upload New Slide Photo</label>
+          <input type="file" id="heroSlide3" name="heroSlide3" accept="image/*" class="crop-input" data-aspect="1.3333" data-preview="#previewHero3">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="heroSlide3Url" style="font-size: 11px; color: var(--admin-text-secondary);">Or Slide 3 Web URL:</label>
+          <input type="text" id="heroSlide3Url" name="heroSlide3Url" value="<%= (settings.heroSlide3 && !settings.heroSlide3.startsWith('/uploads/') && !settings.heroSlide3.startsWith('/images/')) ? settings.heroSlide3 : '' %>" placeholder="https://example.com/hero3.jpg" class="live-url-input" data-target="#previewHero3">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ========================================================
+       SECTION 3: HERO TEXT & TAGLINE
+       ======================================================== -->
+  <div class="admin-card" style="margin-bottom: 30px; border-left: 4px solid #9b59b6;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--admin-border-color); padding-bottom: 12px;">
+      <div>
+        <h3 style="margin: 0; font-size: 18px; color: var(--admin-text-main); display: flex; align-items: center; gap: 10px;">
+          <span style="background: #f4ecf7; color: #9b59b6; width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">3</span>
+          Hero Banner Headline & Story
+        </h3>
+        <p style="margin: 5px 0 0 40px; font-size: 13px; color: var(--admin-text-secondary);">
+          Customize the prominent heading and bio text displayed next to the hero food slideshow.
+        </p>
+      </div>
+      <span class="badge" style="background: #9b59b6; color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; text-transform: uppercase; font-weight: 600;">Hero Content</span>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-4">
+        <label for="heroTag">Tagline Badge</label>
+        <input type="text" id="heroTag" name="heroTag" value="<%= settings.heroTag || 'Aroma of Life' %>" placeholder="e.g. Aroma of Life">
+      </div>
+      <div class="form-group col-8">
+        <label for="heroTitle">Hero Title Heading</label>
+        <input type="text" id="heroTitle" name="heroTitle" value="<%= settings.heroTitle || settings.tagline || 'Crafting Stories on a Plate' %>" placeholder="e.g. Crafting Stories on a Plate">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="heroDescription">Hero Bio Description</label>
+      <textarea id="heroDescription" name="heroDescription" rows="3" placeholder="Brief introduction text next to hero slides..."><%= settings.heroDescription || 'Classically trained culinary professional with over 15 years of experience leading high-volume Mediterranean kitchens. For Chef Nitesh, cooking is an art form driven by passion and executed with precision.' %></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-6">
+        <label for="heroBtnText">Button Label</label>
+        <input type="text" id="heroBtnText" name="heroBtnText" value="<%= settings.heroBtnText || 'READ MORE' %>">
+      </div>
+      <div class="form-group col-6">
+        <label for="heroBtnLink">Button Target Link</label>
+        <input type="text" id="heroBtnLink" name="heroBtnLink" value="<%= settings.heroBtnLink || '/about' %>">
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================
+       SECTION 4: CULINARY PHILOSOPHY INTRO
+       ======================================================== -->
+  <div class="admin-card" style="margin-bottom: 30px; border-left: 4px solid #e67e22;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--admin-border-color); padding-bottom: 12px;">
+      <div>
+        <h3 style="margin: 0; font-size: 18px; color: var(--admin-text-main); display: flex; align-items: center; gap: 10px;">
+          <span style="background: #fdf2e9; color: #e67e22; width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">4</span>
+          Culinary Philosophy Section
+        </h3>
+        <p style="margin: 5px 0 0 40px; font-size: 13px; color: var(--admin-text-secondary);">
+          The banner that follows the Hero section, displaying the chef's culinary philosophy and quote.
+        </p>
+      </div>
+      <span class="badge" style="background: #e67e22; color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; text-transform: uppercase; font-weight: 600;">Philosophy</span>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-6">
+        <label for="introTitle">Section Title</label>
+        <input type="text" id="introTitle" name="introTitle" value="<%= settings.introTitle || 'The Culinary Philosophy' %>">
+      </div>
+      <div class="form-group col-6">
+        <label for="introSignature">Signature Name</label>
+        <input type="text" id="introSignature" name="introSignature" value="<%= settings.introSignature || 'Chef Nitesh Sharma' %>">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="introQuote">Featured Philosophy Quote</label>
+      <input type="text" id="introQuote" name="introQuote" value="<%= settings.introQuote || '"A plate of food is a canvas. It should tell a story of the soil it grew in, the hands that cultivated it, and the culture that inspired it."' %>">
+    </div>
+
+    <div class="form-group">
+      <label for="introText">Philosophy Description Paragraph</label>
+      <textarea id="introText" name="introText" rows="3"><%= settings.introText || 'Every seasonal program is orchestrated to guide guests on a sensory journey, blending traditional Mediterranean flavors with contemporary cooking techniques and a deep commitment to sustainable culinary systems.' %></textarea>
+    </div>
+  </div>
+
+
+  <!-- ========================================================
+       SECTION 5: SIDEBAR CHEF WIDGET ON HOMEPAGE
+       ======================================================== -->
+  <div class="admin-card" style="margin-bottom: 30px; border-left: 4px solid #16a085;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--admin-border-color); padding-bottom: 12px;">
+      <div>
+        <h3 style="margin: 0; font-size: 18px; color: var(--admin-text-main); display: flex; align-items: center; gap: 10px;">
+          <span style="background: #e8f8f5; color: #16a085; width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">5</span>
+          Sidebar Chef Card (Next to From The Blog)
+        </h3>
+        <p style="margin: 5px 0 0 40px; font-size: 13px; color: var(--admin-text-secondary);">
+          The portrait and bio snippet in the right sidebar of the homepage blog preview.
+        </p>
+      </div>
+      <span class="badge" style="background: #16a085; color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; text-transform: uppercase; font-weight: 600;">Sidebar Card</span>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-8">
+        <label for="chefWidgetTitle">Widget Header Title</label>
+        <input type="text" id="chefWidgetTitle" name="chefWidgetTitle" value="<%= settings.chefWidgetTitle || 'The Chef' %>">
+        
+        <label for="chefWidgetIntro" style="margin-top: 15px;">Widget Short Intro Bio</label>
+        <textarea id="chefWidgetIntro" name="chefWidgetIntro" rows="3"><%= settings.chefWidgetIntro || 'Chef Nitesh Sharma is a classically trained culinary professional specializing in modern Mediterranean menus, farm-to-table cuisine, and zero-waste kitchen practices.' %></textarea>
+
+        <div style="margin-top: 15px;">
+          <label for="chefWidgetImage">Upload Specific Widget Portrait (optional)</label>
+          <input type="file" id="chefWidgetImage" name="chefWidgetImage" accept="image/*" class="crop-input" data-aspect="0.75" data-preview="#previewChefWidget">
+          <small class="form-help">Leave empty to use main Chef Profile Image.</small>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <label for="chefWidgetImageUrl" style="font-size: 11px; color: var(--admin-text-secondary);">Or Image Web URL:</label>
+          <input type="text" id="chefWidgetImageUrl" name="chefWidgetImageUrl" value="<%= (settings.chefWidgetImage && !settings.chefWidgetImage.startsWith('/uploads/') && !settings.chefWidgetImage.startsWith('/images/')) ? settings.chefWidgetImage : '' %>" placeholder="https://example.com/chef.jpg" class="live-url-input" data-target="#previewChefWidget">
+        </div>
+      </div>
+
+      <div class="form-group col-4" style="text-align: center;">
+        <label>Current Widget Portrait</label>
+        <div style="margin-top: 5px; background: #fff; border: 1px solid var(--admin-border-color); border-radius: 6px; padding: 12px; display: inline-block;">
+          <img id="previewChefWidget" src="<%= settings.chefWidgetImage || settings.chefImage || '/images/chef-portrait.jpg' %>" alt="Chef Widget" onerror="this.onerror=null;this.src='/images/chef-portrait.jpg';" style="width: 140px; height: 175px; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <small style="display: block; font-size: 11px; color: #777; margin-top: 6px;">Widget Photo</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Save Button Floating / Bottom Bar -->
+  <div style="position: sticky; bottom: 20px; z-index: 100; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); padding: 16px 24px; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); border: 1px solid var(--admin-border-color); display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+    <div>
+      <span style="font-weight: 600; color: var(--admin-text-main); font-size: 14px;">
+        <i class="fas fa-info-circle" style="color: var(--admin-blue); margin-right: 6px;"></i> Ready to publish homepage photo updates?
+      </span>
+      <span style="display: block; font-size: 12px; color: var(--admin-text-secondary);">Changes will be immediately visible on the website.</span>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <a href="/admin" class="btn-secondary" style="padding: 12px 20px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center;">Cancel</a>
+      <button type="submit" class="btn-primary" style="padding: 12px 28px; font-size: 14px; font-weight: 600; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px; background: #27ae60; border: none; cursor: pointer; color: white;">
+        <i class="fas fa-save"></i> SAVE HOMEPAGE PHOTOS & CONTENT
+      </button>
+    </div>
+  </div>
+
+</form>
+
+<script>
+  // Live Preview listener for Image URL inputs
+  document.querySelectorAll('.live-url-input').forEach(input => {
+    const targetSelector = input.getAttribute('data-target');
+    const targetImg = document.querySelector(targetSelector);
+    if (targetImg) {
+      input.addEventListener('input', function() {
+        const url = this.value.trim();
+        if (url) {
+          targetImg.src = url;
+        }
+      });
+    }
+  });
+</script>
+
+</main>
+</div>
+</body>
+</html>

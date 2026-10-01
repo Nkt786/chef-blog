@@ -31,7 +31,39 @@ const DEFAULT_DATA = {
     contactNewsletterTitle: 'Subscribe to Chef Newsletter',
     contactNewsletterText: 'Stay updated with seasonal recipe releases and zero-waste cooking methods directly from my kitchen.',
     galleryHeading: 'Culinary Gallery',
-    gallerySubtitle: 'Signature Creations by Chef Nitesh'
+    gallerySubtitle: 'Signature Creations by Chef Nitesh',
+
+    // Hero Section Slideshow & Story
+    heroSlide1: '/images/recipe-salmon.jpg',
+    heroSlide2: '/images/sea-bass.jpg',
+    heroSlide3: '/images/truffle-chicken.jpg',
+    heroSlide1Title: 'Mediterranean Herb Crusted Salmon',
+    heroSlide2Title: 'Pan-Seared Sea Bass with Caponata',
+    heroSlide3Title: 'Truffle Butter Roasted Chicken',
+    heroTag: 'Aroma of Life',
+    heroTitle: 'Crafting Stories on a Plate',
+    heroDescription: 'Classically trained culinary professional with over 15 years of experience leading high-volume Mediterranean kitchens. For Chef Nitesh, cooking is an art form driven by passion and executed with precision.',
+    heroBtnText: 'READ MORE',
+    heroBtnLink: '/about',
+
+    // Homepage 3-Photo Showcase Section
+    showcaseImage1: '/images/sea-bass.jpg',
+    showcaseTitle1: 'Pan-Seared Sea Bass',
+    showcaseImage2: '/images/chef-portrait.jpg',
+    showcaseTitle2: 'Chef Nitesh Sharma',
+    showcaseImage3: '/images/recipe-salmon.jpg',
+    showcaseTitle3: 'Herb Crusted Salmon',
+
+    // Culinary Philosophy Intro Section
+    introTitle: 'The Culinary Philosophy',
+    introQuote: '"A plate of food is a canvas. It should tell a story of the soil it grew in, the hands that cultivated it, and the culture that inspired it."',
+    introText: 'Every seasonal program is orchestrated to guide guests on a sensory journey, blending traditional Mediterranean flavors with contemporary cooking techniques and a deep commitment to sustainable culinary systems.',
+    introSignature: 'Chef Nitesh Sharma',
+
+    // Sidebar Chef Widget
+    chefWidgetTitle: 'The Chef',
+    chefWidgetImage: '/images/chef-portrait.jpg',
+    chefWidgetIntro: 'Chef Nitesh Sharma is a classically trained culinary professional specializing in modern Mediterranean menus, farm-to-table cuisine, and zero-waste kitchen practices.'
   },
   blogs: [
     {
@@ -207,7 +239,10 @@ const DEFAULT_DATA = {
     { id: 'cat4', name: 'Pork' },
     { id: 'cat5', name: 'Vegetables' },
     { id: 'cat6', name: 'Salads' },
-    { id: 'cat7', name: 'Soups' }
+    { id: 'cat7', name: 'Soups' },
+    { id: 'cat8', name: 'Pasta' },
+    { id: 'cat9', name: 'Seafood' },
+    { id: 'cat10', name: 'Dessert' }
   ],
   gallery: [
     {
@@ -249,6 +284,22 @@ const DEFAULT_DATA = {
       category: 'Salads',
       description: 'Organic golden and red beets with goat cheese crumble and citrus reduction.',
       date: '2026-05-18'
+    },
+    {
+      id: 'g6',
+      title: 'Classic Creamy Fettuccine Alfredo',
+      image: '/images/recipe-salmon.jpg',
+      category: 'Pasta',
+      description: 'Handmade fettuccine pasta swirled in an aromatic parmesan, garlic, and wild herb reduction.',
+      date: '2026-08-29'
+    },
+    {
+      id: 'g7',
+      title: 'Rustic Tuscan White Bean & Herb Soup',
+      image: '/images/farm-sourcing.jpg',
+      category: 'Soups',
+      description: 'Slow-simmered cannellini beans, heirloom tomatoes, fresh rosemary, and fragrant extra virgin olive oil.',
+      date: '2026-08-14'
     }
   ]
 };
@@ -449,6 +500,23 @@ async function initializeDbSeed() {
           await new models.gallery(item).save();
         }
       }
+
+      // Ensure Pasta and Soups categories exist
+      try {
+        const existingCats = await models.categories.find({}).lean();
+        const catNames = existingCats.map(c => (c.name || '').trim().toLowerCase());
+        if (!catNames.includes('pasta')) {
+          await new models.categories({ id: 'cat_pasta_' + Date.now().toString(36), name: 'Pasta' }).save();
+        }
+        if (!catNames.includes('soups') && !catNames.includes('soup')) {
+          await new models.categories({ id: 'cat_soups_' + Date.now().toString(36), name: 'Soups' }).save();
+        }
+        if (!catNames.includes('vegetables') && !catNames.includes('vegetable')) {
+          await new models.categories({ id: 'cat_veg_' + Date.now().toString(36), name: 'Vegetables' }).save();
+        }
+      } catch (catSeedErr) {
+        console.warn('Note: Category check:', catSeedErr.message);
+      }
     }
   } catch (err) {
     console.error('Error during default database seeding:', err.message);
@@ -589,9 +657,13 @@ module.exports = {
   // Media (Binary Image Storage) Methods
   async saveMedia(filename, contentType, buffer) {
     try {
+      if (!buffer || buffer.length > 15 * 1024 * 1024) {
+        console.warn(`Buffer size for ${filename} exceeds 15MB limit or is empty`);
+        return false;
+      }
       await models.media.findOneAndUpdate(
         { filename },
-        { filename, contentType, data: buffer, size: buffer.length, date: new Date() },
+        { filename, contentType: contentType || 'image/jpeg', data: buffer, size: buffer.length, date: new Date() },
         { upsert: true, new: true }
       );
       return true;
@@ -603,7 +675,12 @@ module.exports = {
 
   async getMedia(filename) {
     try {
-      const doc = await models.media.findOne({ filename }).lean();
+      let doc = await models.media.findOne({ filename }).lean();
+      if (!doc) {
+        // Fallback: case-insensitive match on filename
+        const safeName = filename.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        doc = await models.media.findOne({ filename: { $regex: new RegExp(`^${safeName}$`, 'i') } }).lean();
+      }
       if (!doc) return null;
       if (doc.data && !Buffer.isBuffer(doc.data)) {
         doc.data = doc.data.buffer ? Buffer.from(doc.data.buffer) : Buffer.from(doc.data);

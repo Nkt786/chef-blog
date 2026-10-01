@@ -5,18 +5,18 @@
   <div class="container hero-container">
     <div class="hero-image-side">
       <div class="hero-slideshow">
-        <img src="/images/recipe-salmon.jpg" class="hero-slide active" alt="Mediterranean Herb Crusted Salmon">
-        <img src="/images/sea-bass.jpg" class="hero-slide" alt="Pan-Seared Sea Bass with Caponata">
-        <img src="/images/truffle-chicken.jpg" class="hero-slide" alt="Truffle Butter Roasted Chicken">
+        <img src="<%= settings.heroSlide1 || '/images/recipe-salmon.jpg' %>" class="hero-slide active" alt="<%= settings.heroSlide1Title || 'Mediterranean Herb Crusted Salmon' %>" onerror="this.onerror=null;this.src='/images/recipe-salmon.jpg';">
+        <img src="<%= settings.heroSlide2 || '/images/sea-bass.jpg' %>" class="hero-slide" alt="<%= settings.heroSlide2Title || 'Pan-Seared Sea Bass with Caponata' %>" onerror="this.onerror=null;this.src='/images/sea-bass.jpg';">
+        <img src="<%= settings.heroSlide3 || '/images/truffle-chicken.jpg' %>" class="hero-slide" alt="<%= settings.heroSlide3Title || 'Truffle Butter Roasted Chicken' %>" onerror="this.onerror=null;this.src='/images/truffle-chicken.jpg';">
       </div>
     </div>
     <div class="hero-text-side">
-      <span class="hero-tag">Aroma of Life</span>
-      <h1 class="hero-title">Crafting Stories on a Plate</h1>
+      <span class="hero-tag"><%= settings.heroTag || 'Aroma of Life' %></span>
+      <h1 class="hero-title"><%= settings.heroTitle || settings.tagline || 'Crafting Stories on a Plate' %></h1>
       <p class="hero-description">
-        Classically trained culinary professional with over 15 years of experience leading high-volume Mediterranean kitchens. For Chef Nitesh, cooking is an art form driven by passion and executed with precision.
+        <%= settings.heroDescription || 'Classically trained culinary professional with over 15 years of experience leading high-volume Mediterranean kitchens. For Chef Nitesh, cooking is an art form driven by passion and executed with precision.' %>
       </p>
-      <a href="/about" class="btn-hero">READ MORE</a>
+      <a href="<%= settings.heroBtnLink || '/about' %>" class="btn-hero"><%= settings.heroBtnText || 'READ MORE' %></a>
     </div>
   </div>
 </section>
@@ -25,12 +25,12 @@
 <section class="intro-section scroll-reveal">
   <div class="container intro-container">
     <div class="intro-content">
-      <h2 class="section-title">The Culinary Philosophy</h2>
-      <p class="intro-quote">"A plate of food is a canvas. It should tell a story of the soil it grew in, the hands that cultivated it, and the culture that inspired it."</p>
+      <h2 class="section-title"><%= settings.introTitle || 'The Culinary Philosophy' %></h2>
+      <p class="intro-quote"><%= settings.introQuote || '"A plate of food is a canvas. It should tell a story of the soil it grew in, the hands that cultivated it, and the culture that inspired it."' %></p>
       <p class="intro-text">
-        Every seasonal program is orchestrated to guide guests on a sensory journey, blending traditional Mediterranean flavors with contemporary cooking techniques and a deep commitment to sustainable culinary systems.
+        <%= settings.introText || 'Every seasonal program is orchestrated to guide guests on a sensory journey, blending traditional Mediterranean flavors with contemporary cooking techniques and a deep commitment to sustainable culinary systems.' %>
       </p>
-      <div class="intro-signature">Chef Nitesh Sharma</div>
+      <div class="intro-signature"><%= settings.introSignature || 'Chef Nitesh Sharma' %></div>
     </div>
   </div>
 </section>
@@ -45,7 +45,7 @@
     </div>
     
     <div class="recipes-grid">
-      <% featuredGallery.forEach(item => { %>
+      <% (featuredGallery || []).forEach(item => { %>
         <article class="gallery-card">
           <div class="gallery-card-image-wrapper" style="height: 240px;">
             <a href="/gallery">
@@ -78,21 +78,21 @@
   <div class="container">
     <div class="showcase-grid">
       <div class="showcase-item">
-        <img src="/images/sea-bass.jpg" alt="Mediterranean Sea Bass">
+        <img src="<%= settings.showcaseImage1 || '/images/sea-bass.jpg' %>" alt="<%= settings.showcaseTitle1 || 'Pan-Seared Sea Bass' %>" onerror="this.onerror=null;this.src='/images/sea-bass.jpg';">
         <div class="showcase-overlay">
-          <span>Pan-Seared Sea Bass</span>
+          <span><%= settings.showcaseTitle1 || 'Pan-Seared Sea Bass' %></span>
         </div>
       </div>
       <div class="showcase-item">
-        <img src="<%= settings.chefImage || '/images/chef-portrait.jpg' %>" alt="Chef Nitesh Sharma in action" onerror="this.onerror=null;this.src='/images/chef-portrait.jpg';">
+        <img src="<%= settings.showcaseImage2 || settings.chefImage || '/images/chef-portrait.jpg' %>" alt="<%= settings.showcaseTitle2 || 'Chef Nitesh Sharma' %>" onerror="this.onerror=null;this.src='/images/chef-portrait.jpg';">
         <div class="showcase-overlay">
-          <span>Chef Nitesh Sharma</span>
+          <span><%= settings.showcaseTitle2 || 'Chef Nitesh Sharma' %></span>
         </div>
       </div>
       <div class="showcase-item">
-        <img src="/images/recipe-salmon.jpg" alt="Gourmet plating salmon">
+        <img src="<%= settings.showcaseImage3 || '/images/recipe-salmon.jpg' %>" alt="<%= settings.showcaseTitle3 || 'Herb Crusted Salmon' %>" onerror="this.onerror=null;this.src='/images/recipe-salmon.jpg';">
         <div class="showcase-overlay">
-          <span>Herb Crusted Salmon</span>
+          <span><%= settings.showcaseTitle3 || 'Herb Crusted Salmon' %></span>
         </div>
       </div>
     </div>
@@ -152,12 +152,12 @@
     <!-- Right Content Sidebar -->
     <aside class="blog-preview-sidebar">
       <div class="sidebar-widget about-widget">
-        <h3 class="widget-title">The Chef</h3>
+        <h3 class="widget-title"><%= settings.chefWidgetTitle || 'The Chef' %></h3>
         <div class="chef-widget-image">
-          <img src="<%= settings.chefImage || '/images/chef-portrait.jpg' %>" alt="Chef Nitesh Sharma Portrait" onerror="this.onerror=null;this.src='/images/chef-portrait.jpg';">
+          <img src="<%= settings.chefWidgetImage || settings.chefImage || '/images/chef-portrait.jpg' %>" alt="Chef Nitesh Sharma Portrait" onerror="this.onerror=null;this.src='/images/chef-portrait.jpg';">
         </div>
         <p class="chef-widget-intro">
-          Chef Nitesh Sharma is a classically trained culinary professional specializing in modern Mediterranean menus, farm-to-table cuisine, and zero-waste kitchen practices.
+          <%= settings.chefWidgetIntro || 'Chef Nitesh Sharma is a classically trained culinary professional specializing in modern Mediterranean menus, farm-to-table cuisine, and zero-waste kitchen practices.' %>
         </p>
         <a href="/about" class="widget-link">My Story <i class="fas fa-arrow-right"></i></a>
       </div>
