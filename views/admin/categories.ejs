@@ -1,28 +1,233 @@
 <%- include('../partials/admin-nav') %>
 
-<div class="panel-header flex-header">
+<style>
+  .cat-name-link {
+    color: var(--admin-text-main, #1e293b);
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+  .cat-name-link:hover {
+    color: var(--admin-blue, #1890ff);
+  }
+  .cat-thumbs-preview {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    min-height: 44px;
+  }
+  .cat-dish-thumb {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .cat-thumbs-preview:hover .cat-dish-thumb {
+    transform: translateY(-2px);
+  }
+  .cat-dish-thumb:hover {
+    transform: scale(1.25) translateY(-3px) !important;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.22);
+    z-index: 10;
+    position: relative;
+  }
+  .cat-more-badge {
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .cat-more-badge:hover {
+    background: #cbd5e1;
+    color: #0f172a;
+  }
+  .cat-empty-thumb {
+    font-size: 12px;
+    color: #94a3b8;
+    font-style: italic;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .btn-dish-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-dish-count.has-dishes {
+    background: #e6f7ff;
+    color: #096dd9;
+    border: 1px solid #91d5ff;
+  }
+  .btn-dish-count.has-dishes:hover {
+    background: #bae7ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(24,144,255,0.2);
+  }
+  .btn-dish-count.no-dishes {
+    background: #f5f5f5;
+    color: #8c8c8c;
+    border: 1px solid #d9d9d9;
+  }
+  .btn-dish-count.no-dishes:hover {
+    background: #e8e8e8;
+  }
+
+  /* Modal Specific Styling */
+  .cat-modal-dialog {
+    max-width: 840px !important;
+    width: 95% !important;
+    max-height: 90vh !important;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 28px !important;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  }
+  .cat-modal-body {
+    overflow-y: auto;
+    padding: 10px 4px;
+    max-height: calc(90vh - 150px);
+  }
+  .cat-dishes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .cat-dish-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .cat-dish-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.09);
+    border-color: #cbd5e1;
+  }
+  .cat-dish-card img {
+    width: 100%;
+    height: 155px;
+    object-fit: cover;
+    background: #f8fafc;
+  }
+  .cat-dish-card-info {
+    padding: 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .cat-dish-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 6px 0;
+  }
+  .cat-dish-card-desc {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.45;
+    margin-bottom: 12px;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .cat-dish-card-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid #f1f5f9;
+  }
+  .cat-btn-sm {
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+  }
+  .cat-btn-edit {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+  }
+  .cat-btn-edit:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+  .cat-btn-view {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+  }
+  .cat-btn-view:hover {
+    background: #dbeafe;
+  }
+</style>
+
+<div class="panel-header flex-header" style="margin-bottom: 25px;">
   <div>
     <h2><i class="fas fa-tags"></i> Manage Dish Categories</h2>
-    <p>Create and organize custom categories for your culinary dishes and portfolio</p>
+    <p>Create and organize dish categories, and click any category to see its assigned dishes and photos</p>
   </div>
-  <a href="/admin/gallery" class="btn-secondary"><i class="fas fa-arrow-left"></i> BACK TO GALLERY</a>
+  <div style="display: flex; gap: 10px;">
+    <a href="/admin/gallery" class="btn-secondary"><i class="fas fa-camera-retro"></i> VIEW ALL DISHES</a>
+    <a href="/admin/gallery/add" class="btn-primary"><i class="fas fa-plus"></i> ADD FOOD PHOTO</a>
+  </div>
 </div>
+
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="login-error" style="margin-bottom: 20px; background: #fff1f0; border: 1px solid #ffa39e; color: #cf1322; padding: 12px 18px; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 14px;">
+    <i class="fas fa-exclamation-circle" style="font-size: 18px;"></i>
+    <span><%= error %></span>
+  </div>
+<% } %>
+
+<% if (typeof success !== 'undefined' && success) { %>
+  <div class="login-success" style="margin-bottom: 20px; background: #f6ffed; border: 1px solid #b7eb8f; color: #389e0d; padding: 12px 18px; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 14px;">
+    <i class="fas fa-check-circle" style="font-size: 18px;"></i>
+    <span><%= success %></span>
+  </div>
+<% } %>
 
 <!-- Add Category Form -->
 <div class="content-panel">
   <h3>Add New Category</h3>
   <div class="panel-divider"></div>
-  
-  <% if (typeof error !== 'undefined' && error) { %>
-    <div class="login-error" style="margin-bottom: 20px;">
-      <i class="fas fa-exclamation-circle"></i> <%= error %>
-    </div>
-  <% } %>
 
   <form action="/admin/categories/add" method="POST" class="admin-form flex-upload-form">
     <div class="form-group flex-1">
       <label for="name" class="sr-only">Category Name *</label>
-      <input type="text" id="name" name="name" required placeholder="e.g. Seafood, Indian, Desserts">
+      <input type="text" id="name" name="name" required placeholder="e.g. Seafood, Indian, Desserts, Salads">
     </div>
     <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> ADD CATEGORY</button>
   </form>
@@ -30,7 +235,12 @@
 
 <!-- Category List Table -->
 <div class="table-container m-t-30">
-  <h3>Current Active Categories</h3>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <div>
+      <h3 style="margin-bottom: 4px;">Current Active Categories</h3>
+      <p style="font-size: 13px; color: var(--admin-text-secondary); margin: 0;">Click on any category name or photo to view all dishes in that category</p>
+    </div>
+  </div>
   <div class="panel-divider"></div>
 
   <% if (categories.length === 0) { %>
@@ -41,20 +251,64 @@
     <table class="admin-table">
       <thead>
         <tr>
-          <th>#</th>
+          <th style="width: 50px;">#</th>
           <th>Category Name</th>
-          <th>Actions</th>
+          <th>Dish Pictures Preview</th>
+          <th>Total Dishes</th>
+          <th style="text-align: right; width: 140px;">Actions</th>
         </tr>
       </thead>
       <tbody>
         <% categories.forEach((cat, index) => { %>
           <tr>
-            <td style="width: 80px;"><%= index + 1 %></td>
-            <td><strong><%= cat.name %></strong></td>
-            <td class="td-actions">
-              <form action="/admin/categories/delete/<%= cat.id %>" method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to delete the category \'<%= cat.name %>\'? Recipes under this category won\'t be deleted but will lose their category association.');">
-                <button type="submit" class="btn-action btn-delete" title="Delete Category"><i class="fas fa-trash-alt"></i></button>
-              </form>
+            <td style="width: 50px; color: var(--admin-text-secondary); font-weight: 500;"><%= index + 1 %></td>
+            
+            <!-- Category Name (Clickable) -->
+            <td>
+              <a href="javascript:void(0)" onclick="openCatModal('<%= cat.id %>')" class="cat-name-link" title="Click to view <%= cat.name %> dishes">
+                <i class="fas fa-tag" style="color: var(--admin-blue);"></i>
+                <span><%= cat.name %></span>
+              </a>
+            </td>
+
+            <!-- Dish Pictures Preview -->
+            <td>
+              <div class="cat-thumbs-preview" onclick="openCatModal('<%= cat.id %>')" title="Click to view all <%= cat.name %> photos">
+                <% if (cat.dishes && cat.dishes.length > 0) { %>
+                  <% cat.dishes.slice(0, 4).forEach(dish => { %>
+                    <img src="<%= dish.image %>" alt="<%= dish.title %>" class="cat-dish-thumb" onerror="this.onerror=null;this.src='/images/default-food.jpg';" title="<%= dish.title %>">
+                  <% }) %>
+                  <% if (cat.dishes.length > 4) { %>
+                    <span class="cat-more-badge">+<%= cat.dishes.length - 4 %> more</span>
+                  <% } %>
+                <% } else { %>
+                  <span class="cat-empty-thumb"><i class="far fa-image"></i> No photos yet</span>
+                <% } %>
+              </div>
+            </td>
+
+            <!-- Dishes Count (Clickable Button) -->
+            <td>
+              <button type="button" class="btn-dish-count <%= cat.dishesCount > 0 ? 'has-dishes' : 'no-dishes' %>" onclick="openCatModal('<%= cat.id %>')" title="Click to see all dishes in <%= cat.name %>">
+                <i class="fas fa-utensils"></i>
+                <span><%= cat.dishesCount %> <%= cat.dishesCount === 1 ? 'Dish' : 'Dishes' %></span>
+                <i class="fas fa-chevron-right" style="font-size: 10px; margin-left: 2px; opacity: 0.7;"></i>
+              </button>
+            </td>
+
+            <!-- Actions -->
+            <td class="td-actions" style="text-align: right;">
+              <div style="display: inline-flex; gap: 6px;">
+                <button type="button" class="btn-action" style="color: var(--admin-blue);" onclick="openCatModal('<%= cat.id %>')" title="View Dishes in <%= cat.name %>">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <a href="/admin/gallery/add?category=<%= encodeURIComponent(cat.name) %>" class="btn-action" style="color: var(--admin-green);" title="Add New Dish to <%= cat.name %>">
+                  <i class="fas fa-plus"></i>
+                </a>
+                <form action="/admin/categories/delete/<%= cat.id %>" method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to delete the category \'<%= cat.name %>\'? Existing dishes will be preserved under Specialty.');">
+                  <button type="submit" class="btn-action btn-delete" title="Delete Category"><i class="fas fa-trash-alt"></i></button>
+                </form>
+              </div>
             </td>
           </tr>
         <% }) %>
@@ -62,6 +316,111 @@
     </table>
   <% } %>
 </div>
+
+<!-- Category Dishes Modal / Drawer -->
+<div class="admin-modal" id="catDishesModal">
+  <div class="modal-content cat-modal-dialog">
+    <div class="modal-header">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-utensils" style="font-size: 20px; color: var(--admin-blue);"></i>
+        <h3 id="modalCatTitle" style="margin: 0; font-size: 20px;">Category Dishes</h3>
+        <span id="modalCatCountBadge" class="badge badge-info">0 Dishes</span>
+      </div>
+      <span class="modal-close" onclick="closeCatModal()">&times;</span>
+    </div>
+    
+    <div class="cat-modal-body">
+      <div id="modalDishesContent">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+      <a id="modalAddDishBtn" href="/admin/gallery/add" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px;">
+        <i class="fas fa-plus"></i> Add New Dish to this Category
+      </a>
+      <button type="button" class="btn-secondary" onclick="closeCatModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Categories dataset injected from server
+  const categoriesData = <%- JSON.stringify(categories) %>;
+
+  function openCatModal(catId) {
+    const category = categoriesData.find(c => String(c.id) === String(catId));
+    if (!category) return;
+
+    // Update Header
+    document.getElementById('modalCatTitle').textContent = category.name + ' Dishes';
+    const countBadge = document.getElementById('modalCatCountBadge');
+    countBadge.textContent = `${category.dishesCount} ${category.dishesCount === 1 ? 'Dish' : 'Dishes'}`;
+    
+    // Update Add Button Link
+    const addBtn = document.getElementById('modalAddDishBtn');
+    addBtn.href = `/admin/gallery/add?category=${encodeURIComponent(category.name)}`;
+    addBtn.innerHTML = `<i class="fas fa-plus"></i> Add New Dish to ${category.name}`;
+
+    // Render Dishes Grid
+    const container = document.getElementById('modalDishesContent');
+    if (!category.dishes || category.dishes.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+          <i class="far fa-images" style="font-size: 42px; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
+          <h4 style="font-size: 16px; color: #334155; margin-bottom: 6px;">No Dishes in "${category.name}" Yet</h4>
+          <p style="font-size: 13px; max-width: 400px; margin: 0 auto 16px auto;">Upload your signature food photos and tag them with "${category.name}" to display them here.</p>
+          <a href="/admin/gallery/add?category=${encodeURIComponent(category.name)}" class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fas fa-plus"></i> Add First Dish Now
+          </a>
+        </div>
+      `;
+    } else {
+      let cardsHtml = '<div class="cat-dishes-grid">';
+      category.dishes.forEach(dish => {
+        cardsHtml += `
+          <div class="cat-dish-card">
+            <img src="${dish.image}" alt="${dish.title}" onerror="this.onerror=null;this.src='/images/default-food.jpg';">
+            <div class="cat-dish-card-info">
+              <h4 class="cat-dish-card-title">${dish.title}</h4>
+              <p class="cat-dish-card-desc">${dish.description || 'Signature culinary preparation by Chef Nitesh Sharma.'}</p>
+              <div class="cat-dish-card-actions">
+                <a href="/admin/gallery/edit/${dish.id}" class="cat-btn-sm cat-btn-edit">
+                  <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="/gallery?category=${encodeURIComponent(category.name)}" target="_blank" class="cat-btn-sm cat-btn-view">
+                  <i class="fas fa-external-link-alt"></i> View on Site
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      cardsHtml += '</div>';
+      container.innerHTML = cardsHtml;
+    }
+
+    document.getElementById('catDishesModal').classList.add('active');
+  }
+
+  function closeCatModal() {
+    document.getElementById('catDishesModal').classList.remove('active');
+  }
+
+  // Close modal when clicking outside content
+  document.getElementById('catDishesModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeCatModal();
+    }
+  });
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeCatModal();
+    }
+  });
+</script>
 
 </main>
 </div>

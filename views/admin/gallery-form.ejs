@@ -37,7 +37,7 @@
         </div>
         <select id="category" name="category" required style="width: 100%;">
           <% categories.forEach(cat => { %>
-            <option value="<%= cat %>" <%= (item && (item.category === cat || item.category.toLowerCase() === cat.toLowerCase())) ? 'selected' : '' %>><%= cat %></option>
+            <option value="<%= cat %>" <%= ((item && (item.category === cat || item.category.toLowerCase() === cat.toLowerCase())) || (typeof selectedCat !== 'undefined' && selectedCat && selectedCat.toLowerCase() === cat.toLowerCase())) ? 'selected' : '' %>><%= cat %></option>
           <% }) %>
         </select>
       </div>

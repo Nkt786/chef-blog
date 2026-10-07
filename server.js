@@ -350,27 +350,16 @@ app.get('/gallery', async (req, res) => {
 
   const categoryFilter = req.query.category || 'All';
   
-  // Load categories dynamically
+  // Load categories strictly from active categories in database
   const dbCategories = await db.get('categories');
-  const catNames = new Set();
-  
-  // Standard prioritized categories so essential categories are always visible
-  const priorityCats = ['Vegetables', 'Pasta', 'Soups', 'Salads', 'Fish', 'Chicken', 'Seafood', 'Dessert', 'Beef', 'Lamb'];
-  
-  // Add from DB
-  dbCategories.forEach(c => { if (c.name) catNames.add(c.name.trim()); });
-  // Add from dishes
-  gallery.forEach(g => { if (g.category) catNames.add(g.category.trim()); });
-  // Add priority categories
-  priorityCats.forEach(c => catNames.add(c));
-
-  // Deduplicate singular/plural equivalents in display tabs
-  const allCatList = Array.from(catNames);
   const categories = [];
-  allCatList.forEach(cat => {
-    const alreadyPresent = categories.some(existing => matchCategory(existing, cat));
-    if (!alreadyPresent) {
-      categories.push(cat);
+  dbCategories.forEach(c => {
+    if (c.name && c.name.trim().length > 0) {
+      const clean = c.name.trim();
+      const alreadyPresent = categories.some(existing => matchCategory(existing, clean));
+      if (!alreadyPresent) {
+        categories.push(clean);
+      }
     }
   });
 
@@ -612,10 +601,9 @@ app.get('/admin/gallery', checkAuth, async (req, res) => {
 
 app.get('/admin/gallery/add', checkAuth, async (req, res) => {
   const dbCategories = await db.get('categories');
-  const catNames = new Set(dbCategories.map(c => c.name.trim()));
-  ['Pasta', 'Soups', 'Vegetables', 'Salads', 'Fish', 'Chicken', 'Dessert', 'Seafood'].forEach(c => catNames.add(c));
-  const categories = Array.from(catNames);
-  res.render('admin/gallery-form', { item: null, categories, error: req.query.error, success: req.query.success });
+  const categories = dbCategories.map(c => c.name.trim()).filter(Boolean);
+  const selectedCat = req.query.category || '';
+  res.render('admin/gallery-form', { item: null, categories, selectedCat, error: req.query.error, success: req.query.success });
 });
 
 app.post('/admin/gallery/add', checkAuth, safeUpload('image'), async (req, res) => {
@@ -676,9 +664,8 @@ app.get('/admin/gallery/edit/:id', checkAuth, async (req, res) => {
   
   const dbCategories = await db.get('categories');
   const catNames = new Set(dbCategories.map(c => c.name.trim()));
-  ['Pasta', 'Soups', 'Vegetables', 'Salads', 'Fish', 'Chicken', 'Dessert', 'Seafood'].forEach(c => catNames.add(c));
   if (item.category) catNames.add(item.category.trim());
-  const categories = Array.from(catNames);
+  const categories = Array.from(catNames).filter(Boolean);
   res.render('admin/gallery-form', { item, categories, error: req.query.error, success: req.query.success });
 });
 
@@ -757,7 +744,30 @@ app.post('/admin/recipes/edit/:id', checkAuth, safeUpload('image'), (req, res) =
 // --- ADMIN: RECIPES CATEGORIES ---
 app.get('/admin/categories', checkAuth, async (req, res) => {
   const categories = await db.get('categories');
-  res.render('admin/categories', { categories, error: req.query.error });
+  const gallery = await db.get('gallery');
+
+  const categoriesWithDishes = categories.map(cat => {
+    const dishes = gallery.filter(dish => matchCategory(dish.category, cat.name));
+    return {
+      id: cat.id,
+      name: cat.name,
+      dishesCount: dishes.length,
+      dishes: dishes.map(d => ({
+        id: d.id,
+        title: d.title,
+        image: d.image || '/images/default-food.jpg',
+        description: d.description || '',
+        category: d.category || cat.name,
+        date: d.date || ''
+      }))
+    };
+  });
+
+  res.render('admin/categories', { 
+    categories: categoriesWithDishes, 
+    error: req.query.error,
+    success: req.query.success
+  });
 });
 
 app.post('/admin/categories/add', checkAuth, async (req, res) => {
@@ -774,12 +784,34 @@ app.post('/admin/categories/add', checkAuth, async (req, res) => {
   }
 
   await db.insert('categories', { name: name.trim() });
-  res.redirect('/admin/categories');
+  res.redirect('/admin/categories?success=Category+added+successfully');
 });
 
 app.post('/admin/categories/delete/:id', checkAuth, async (req, res) => {
-  await db.delete('categories', req.params.id);
-  res.redirect('/admin/categories');
+  try {
+    const cat = await db.getById('categories', req.params.id);
+    if (cat && cat.name) {
+      const catName = cat.name.trim();
+      // Any dishes under this deleted category lose the category and become 'Specialty'
+      const galleryDishes = await db.get('gallery');
+      for (const dish of galleryDishes) {
+        if (matchCategory(dish.category, catName)) {
+          await db.update('gallery', dish.id, { category: 'Specialty' });
+        }
+      }
+      const recipes = await db.get('recipes');
+      for (const r of recipes) {
+        if (matchCategory(r.category, catName)) {
+          await db.update('recipes', r.id, { category: 'Specialty' });
+        }
+      }
+    }
+    await db.delete('categories', req.params.id);
+    res.redirect('/admin/categories?success=Category+deleted+successfully');
+  } catch (err) {
+    console.error('Error deleting category:', err);
+    res.redirect('/admin/categories?error=' + encodeURIComponent(err.message || 'Failed to delete category'));
+  }
 });
 
 app.post('/admin/categories/add-json', checkAuth, async (req, res) => {
@@ -1174,6 +1206,14 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Chef Nitesh Sharma Website running on http://localhost:${PORT}`);
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n⚠️ Port ${PORT} already in use! Close the running node process or change PORT in .env`);
+  } else {
+    console.error('Server error:', err.message);
+  }
 });
