@@ -329,6 +329,7 @@ app.get('/journey', async (req, res) => {
 // 5. Food Gallery Listing Page
 app.get('/gallery', async (req, res) => {
   let gallery = await db.get('gallery');
+  if (!gallery) gallery = [];
   
   // Merge any recipes (like Pasta) if not yet in gallery collection
   const recipes = await db.get('recipes');
@@ -363,17 +364,22 @@ app.get('/gallery', async (req, res) => {
     }
   });
 
-  let filteredGallery = gallery;
-  if (categoryFilter !== 'All') {
-    filteredGallery = gallery.filter(r => matchCategory(r.category, categoryFilter));
-  }
-
   // Sort by date desc
-  filteredGallery.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+  gallery.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+  // Compute live dish count per category
+  const categoryCounts = {};
+  gallery.forEach(item => {
+    const itemCat = (item.category || 'Specialty').trim();
+    const matched = categories.find(c => matchCategory(c, itemCat)) || itemCat;
+    categoryCounts[matched] = (categoryCounts[matched] || 0) + 1;
+  });
 
   res.render('gallery', { 
-    gallery: filteredGallery, 
+    gallery, 
     categories, 
+    categoryCounts,
+    totalDishesCount: gallery.length,
     selectedCategory: categoryFilter,
     matchCategory
   });
@@ -584,17 +590,25 @@ app.post('/admin/blogs/delete/:id', checkAuth, async (req, res) => {
 // --- ADMIN: FOOD GALLERY ---
 app.get('/admin/gallery', checkAuth, async (req, res) => {
   let gallery = await db.get('gallery');
-  if (!gallery || gallery.length === 0) {
-    const recipes = await db.get('recipes');
-    gallery = recipes.map(r => ({
-      id: r.id,
-      title: r.title,
-      image: (r.images && r.images.length > 0) ? r.images[0] : '/images/default-food.jpg',
-      category: r.category || 'Specialty',
-      description: r.description || '',
-      date: r.date
-    }));
-  }
+  if (!gallery) gallery = [];
+
+  const recipes = await db.get('recipes');
+  const galleryTitles = new Set(gallery.map(g => (g.title || '').trim().toLowerCase()));
+
+  recipes.forEach(r => {
+    if (r.title && !galleryTitles.has(r.title.trim().toLowerCase())) {
+      gallery.push({
+        id: r.id,
+        title: r.title,
+        image: (r.images && r.images.length > 0) ? r.images[0] : '/images/default-food.jpg',
+        category: r.category || 'Specialty',
+        description: r.description || '',
+        date: r.date
+      });
+      galleryTitles.add(r.title.trim().toLowerCase());
+    }
+  });
+
   gallery.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
   res.render('admin/gallery', { gallery, error: req.query.error, success: req.query.success });
 });

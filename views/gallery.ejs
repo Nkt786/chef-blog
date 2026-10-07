@@ -1,10 +1,141 @@
 <%- include('partials/header', { title: 'Culinary Gallery' }) %>
 
-<section class="page-title-section fade-in-up">
+<style>
+  /* Compact & beautiful gallery hero */
+  .gallery-hero-header {
+    text-align: center;
+    padding: 35px 20px 25px;
+    background-color: var(--color-white);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 30px;
+  }
+  .gallery-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(85, 107, 79, 0.1);
+    color: var(--color-sage);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .gallery-hero-header .page-title {
+    font-size: 38px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--color-charcoal);
+  }
+  .gallery-hero-header .gallery-hero-desc {
+    color: var(--color-charcoal-light);
+    font-size: 14.5px;
+    max-width: 650px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+  .gallery-page-section {
+    padding-bottom: 70px;
+    background-color: var(--color-cream);
+    min-height: 60vh;
+  }
+  /* Category Pills */
+  .gallery-categories-tabs {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 35px;
+  }
+  .gallery-tab {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border);
+    color: var(--color-charcoal);
+    border-radius: 25px;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+  }
+  .gallery-tab:hover {
+    border-color: var(--color-sage);
+    color: var(--color-sage);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  }
+  .gallery-tab.active {
+    background-color: var(--color-sage);
+    color: var(--color-white);
+    border-color: var(--color-sage);
+    box-shadow: 0 4px 14px rgba(85, 107, 79, 0.28);
+  }
+  .gallery-tab .tab-badge {
+    background: rgba(0, 0, 0, 0.08);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    line-height: 1;
+  }
+  .gallery-tab.active .tab-badge {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+  }
+  /* Grid & Cards - Always immediately visible, no scroll-reveal delay */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 30px;
+  }
+  .gallery-card {
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-subtle);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    animation: galleryCardAppear 0.35s ease-out;
+  }
+  @keyframes galleryCardAppear {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .gallery-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+  }
+</style>
+
+<!-- Compact Hero Header -->
+<section class="gallery-hero-header">
   <div class="container">
-    <span class="page-subtitle"><%= settings.gallerySubtitle || settings.recipeSubtitle || 'Signature Creations by Chef Nitesh' %></span>
+    <div class="gallery-hero-badge">
+      <i class="fas fa-utensils"></i> <%= totalDishesCount %> Signature Dishes
+    </div>
     <h1 class="page-title"><%= settings.galleryHeading || settings.recipeHeading || 'Culinary Gallery' %></h1>
-    <div class="section-line"></div>
+    <p class="gallery-hero-desc">
+      <%= settings.gallerySubtitle || settings.recipeSubtitle || 'Explore signature dishes and culinary creations handcrafted by Chef Nitesh Sharma.' %>
+    </p>
   </div>
 </section>
 
@@ -13,47 +144,61 @@
   <div class="container">
 
     <!-- Categories Filter Tabs -->
-    <div class="gallery-categories-tabs scroll-reveal">
-      <a href="/gallery" class="gallery-tab <%= (!selectedCategory || selectedCategory === 'All') ? 'active' : '' %>">All Dishes</a>
+    <div class="gallery-categories-tabs" id="galleryTabs">
+      <a href="/gallery" class="gallery-tab <%= (!selectedCategory || selectedCategory === 'All') ? 'active' : '' %>" data-filter="All">
+        <span>All Dishes</span>
+        <span class="tab-badge"><%= totalDishesCount %></span>
+      </a>
       <% categories.forEach(cat => { %>
-        <a href="/gallery?category=<%= encodeURIComponent(cat) %>" class="gallery-tab <%= (typeof matchCategory === 'function' ? matchCategory(selectedCategory, cat) : (selectedCategory === cat)) ? 'active' : '' %>"><%= cat %></a>
+        <% const count = categoryCounts[cat] || 0; %>
+        <a href="/gallery?category=<%= encodeURIComponent(cat) %>" class="gallery-tab <%= (typeof matchCategory === 'function' && selectedCategory && selectedCategory !== 'All' && matchCategory(selectedCategory, cat)) ? 'active' : '' %>" data-filter="<%= cat %>">
+          <span><%= cat %></span>
+          <span class="tab-badge"><%= count %></span>
+        </a>
       <% }) %>
     </div>
 
+    <!-- Empty State (Shown if selected category has no dishes) -->
+    <div class="gallery-empty-state" id="galleryEmptyState" style="<%= (gallery.length === 0 || (selectedCategory && selectedCategory !== 'All' && !gallery.some(item => matchCategory(item.category, selectedCategory)))) ? 'display: block;' : 'display: none;' %> text-align: center; padding: 60px 20px; background: #fff; border: 1px solid var(--color-border); border-radius: 8px;">
+      <i class="fas fa-utensils" style="font-size: 38px; color: var(--color-sage); margin-bottom: 15px; display: block;"></i>
+      <h3 style="font-size: 20px; margin-bottom: 8px; color: var(--color-charcoal);">No dishes found</h3>
+      <p style="font-size: 15px; color: var(--color-charcoal-light); margin-bottom: 20px;">
+        There are currently no food photos tagged under <strong id="emptyCategoryName"><%= selectedCategory || 'this' %></strong>.
+      </p>
+      <button type="button" class="btn-outline-sage" onclick="resetToAllDishes()" style="cursor: pointer;">
+        <i class="fas fa-th-large" style="margin-right: 6px;"></i> View All <%= totalDishesCount %> Dishes
+      </button>
+    </div>
+
     <!-- Gallery Cards Grid -->
-    <% if (gallery.length === 0) { %>
-      <div class="gallery-empty-state scroll-reveal" style="text-align: center; padding: 60px 20px; background: #fff; border: 1px solid var(--color-border);">
-        <i class="fas fa-utensils" style="font-size: 36px; color: var(--color-sage); margin-bottom: 15px; display: block;"></i>
-        <p style="font-size: 16px; color: var(--color-charcoal);">No food pictures found in the <strong><%= selectedCategory %></strong> category yet.</p>
-        <p style="margin-top: 15px;"><a href="/gallery" class="btn-outline-sage">View All Dishes</a></p>
-      </div>
-    <% } else { %>
-      <div class="gallery-grid scroll-reveal">
-        <% gallery.forEach(item => { %>
-          <article class="gallery-card">
-            <div class="gallery-card-image-wrapper" onclick="openLightbox('<%= item.image %>', '<%= (item.title || "").replace(/\'/g, "\\\'") %>', '<%= (item.description || "").replace(/\'/g, "\\\'") %>')">
-              <img src="<%= item.image %>" alt="<%= item.title %>" onerror="this.onerror=null;this.src='/images/default-food.jpg';" loading="lazy">
-              <span class="gallery-category-badge"><%= item.category || 'Specialty' %></span>
-              <div class="gallery-zoom-overlay">
-                <span><i class="fas fa-search-plus"></i> View Dish</span>
-              </div>
+    <div class="gallery-grid" id="galleryGrid">
+      <% gallery.forEach(item => { %>
+        <% 
+          const isHidden = (selectedCategory && selectedCategory !== 'All' && !matchCategory(item.category, selectedCategory));
+        %>
+        <article class="gallery-card" data-category="<%= item.category || 'Specialty' %>" style="<%= isHidden ? 'display: none;' : '' %>">
+          <div class="gallery-card-image-wrapper" onclick="openLightbox('<%= item.image %>', '<%= (item.title || "").replace(/\'/g, "\\\'") %>', '<%= (item.description || "").replace(/\'/g, "\\\'") %>')">
+            <img src="<%= item.image %>" alt="<%= item.title %>" onerror="this.onerror=null;this.src='/images/default-food.jpg';" loading="lazy">
+            <span class="gallery-category-badge"><%= item.category || 'Specialty' %></span>
+            <div class="gallery-zoom-overlay">
+              <span><i class="fas fa-search-plus"></i> View Dish</span>
             </div>
-            <div class="gallery-card-body">
-              <h3 class="gallery-dish-name"><%= item.title %></h3>
-              <% if (item.description) { %>
-                <p class="gallery-dish-desc"><%= item.description %></p>
-              <% } %>
-              <div class="gallery-card-footer">
-                <span class="gallery-date"><%= item.date ? new Date(item.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '' %></span>
-                <button type="button" class="gallery-btn-view" onclick="openLightbox('<%= item.image %>', '<%= (item.title || "").replace(/\'/g, "\\\'") %>', '<%= (item.description || "").replace(/\'/g, "\\\'") %>')">
-                  <i class="fas fa-expand-alt"></i> Enlarge
-                </button>
-              </div>
+          </div>
+          <div class="gallery-card-body">
+            <h3 class="gallery-dish-name"><%= item.title %></h3>
+            <% if (item.description) { %>
+              <p class="gallery-dish-desc"><%= item.description %></p>
+            <% } %>
+            <div class="gallery-card-footer">
+              <span class="gallery-date"><%= item.date ? new Date(item.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '' %></span>
+              <button type="button" class="gallery-btn-view" onclick="openLightbox('<%= item.image %>', '<%= (item.title || "").replace(/\'/g, "\\\'") %>', '<%= (item.description || "").replace(/\'/g, "\\\'") %>')">
+                <i class="fas fa-expand-alt"></i> Enlarge
+              </button>
             </div>
-          </article>
-        <% }) %>
-      </div>
-    <% } %>
+          </div>
+        </article>
+      <% }) %>
+    </div>
 
   </div>
 </section>
@@ -73,6 +218,84 @@
 </div>
 
 <script>
+  // Robust Category Matching on Client
+  function matchCategoryClient(itemCat, filterCat) {
+    if (!itemCat || !filterCat) return false;
+    const a = itemCat.toLowerCase().trim().replace(/s$/, '');
+    const b = filterCat.toLowerCase().trim().replace(/s$/, '');
+    return a === b || a.includes(b) || b.includes(a);
+  }
+
+  const tabs = document.querySelectorAll('.gallery-tab');
+  const cards = document.querySelectorAll('.gallery-card');
+  const emptyState = document.getElementById('galleryEmptyState');
+  const emptyCatName = document.getElementById('emptyCategoryName');
+  const galleryGrid = document.getElementById('galleryGrid');
+
+  function filterGallery(filterName) {
+    let visibleCount = 0;
+    cards.forEach(card => {
+      const cardCat = card.getAttribute('data-category');
+      if (filterName === 'All' || matchCategoryClient(cardCat, filterName)) {
+        card.style.display = 'flex';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    if (emptyState) {
+      if (visibleCount === 0) {
+        emptyState.style.display = 'block';
+        if (emptyCatName) emptyCatName.textContent = filterName;
+        if (galleryGrid) galleryGrid.style.display = 'none';
+      } else {
+        emptyState.style.display = 'none';
+        if (galleryGrid) galleryGrid.style.display = 'grid';
+      }
+    }
+  }
+
+  function resetToAllDishes() {
+    const allTab = document.querySelector('.gallery-tab[data-filter="All"]');
+    if (allTab) {
+      allTab.click();
+    } else {
+      window.location.href = '/gallery';
+    }
+  }
+
+  // Instant zero-lag tab switching
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function(e) {
+      e.preventDefault();
+      const filter = this.getAttribute('data-filter') || 'All';
+
+      tabs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+
+      const newUrl = filter === 'All' ? '/gallery' : `/gallery?category=${encodeURIComponent(filter)}`;
+      window.history.pushState({ category: filter }, '', newUrl);
+
+      filterGallery(filter);
+    });
+  });
+
+  // Handle browser Back / Forward buttons
+  window.addEventListener('popstate', function() {
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get('category') || 'All';
+    tabs.forEach(t => {
+      if (t.getAttribute('data-filter') === cat) {
+        t.classList.add('active');
+      } else {
+        t.classList.remove('active');
+      }
+    });
+    filterGallery(cat);
+  });
+
+  // Lightbox Handlers
   function openLightbox(imgSrc, title, desc) {
     const modal = document.getElementById('galleryLightbox');
     const img = document.getElementById('lightboxImg');
@@ -89,8 +312,10 @@
 
   function closeLightbox() {
     const modal = document.getElementById('galleryLightbox');
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
+    if (modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
   }
 
   document.getElementById('galleryLightbox').addEventListener('click', function(e) {

@@ -3,9 +3,12 @@
 <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
   <div>
     <h2><i class="fas fa-camera-retro"></i> Manage Food Gallery</h2>
-    <p>Upload and showcase high-resolution food dishes with dish names and categories</p>
+    <p>Upload and showcase high-resolution food dishes with dish names and categories &bull; <strong><%= gallery ? gallery.length : 0 %> Total Dishes</strong></p>
   </div>
-  <a href="/admin/gallery/add" class="btn-primary"><i class="fas fa-plus"></i> Add New Food Photo</a>
+  <div style="display: flex; gap: 10px;">
+    <a href="/gallery" target="_blank" class="btn-secondary"><i class="fas fa-external-link-alt"></i> View Website Gallery</a>
+    <a href="/admin/gallery/add" class="btn-primary"><i class="fas fa-plus"></i> Add New Food Photo</a>
+  </div>
 </div>
 
 <% if (typeof error !== 'undefined' && error) { %>
@@ -22,7 +25,7 @@
   </div>
 <% } %>
 
-<div class="admin-card">
+<div class="table-container content-panel">
   <div class="table-responsive">
     <table class="admin-table">
       <thead>

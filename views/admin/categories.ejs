@@ -200,7 +200,8 @@
     <p>Create and organize dish categories, and click any category to see its assigned dishes and photos</p>
   </div>
   <div style="display: flex; gap: 10px;">
-    <a href="/admin/gallery" class="btn-secondary"><i class="fas fa-camera-retro"></i> VIEW ALL DISHES</a>
+    <button type="button" onclick="openCatModal('all')" class="btn-secondary" style="cursor: pointer;"><i class="fas fa-camera-retro"></i> VIEW ALL DISHES</button>
+    <a href="/admin/gallery" class="btn-secondary" style="background: white;"><i class="fas fa-table"></i> DISHES TABLE</a>
     <a href="/admin/gallery/add" class="btn-primary"><i class="fas fa-plus"></i> ADD FOOD PHOTO</a>
   </div>
 </div>
@@ -349,35 +350,58 @@
   const categoriesData = <%- JSON.stringify(categories) %>;
 
   function openCatModal(catId) {
-    const category = categoriesData.find(c => String(c.id) === String(catId));
-    if (!category) return;
+    let dishes = [];
+    let title = '';
+    let categoryName = '';
 
-    // Update Header
-    document.getElementById('modalCatTitle').textContent = category.name + ' Dishes';
-    const countBadge = document.getElementById('modalCatCountBadge');
-    countBadge.textContent = `${category.dishesCount} ${category.dishesCount === 1 ? 'Dish' : 'Dishes'}`;
-    
-    // Update Add Button Link
-    const addBtn = document.getElementById('modalAddDishBtn');
-    addBtn.href = `/admin/gallery/add?category=${encodeURIComponent(category.name)}`;
-    addBtn.innerHTML = `<i class="fas fa-plus"></i> Add New Dish to ${category.name}`;
+    if (catId === 'all') {
+      title = 'All Food Dishes';
+      // Gather all unique dishes across categories
+      const seenIds = new Set();
+      categoriesData.forEach(c => {
+        if (c.dishes && c.dishes.length > 0) {
+          c.dishes.forEach(d => {
+            if (!seenIds.has(String(d.id || d.title))) {
+              seenIds.add(String(d.id || d.title));
+              dishes.push(d);
+            }
+          });
+        }
+      });
+      document.getElementById('modalCatTitle').textContent = 'All Dishes';
+      document.getElementById('modalCatCountBadge').textContent = `${dishes.length} ${dishes.length === 1 ? 'Dish' : 'Dishes'}`;
+      const addBtn = document.getElementById('modalAddDishBtn');
+      addBtn.href = '/admin/gallery/add';
+      addBtn.innerHTML = '<i class="fas fa-plus"></i> Add New Dish';
+    } else {
+      const category = categoriesData.find(c => String(c.id) === String(catId));
+      if (!category) return;
+      categoryName = category.name;
+      title = category.name + ' Dishes';
+      dishes = category.dishes || [];
+      document.getElementById('modalCatTitle').textContent = title;
+      document.getElementById('modalCatCountBadge').textContent = `${category.dishesCount} ${category.dishesCount === 1 ? 'Dish' : 'Dishes'}`;
+      const addBtn = document.getElementById('modalAddDishBtn');
+      addBtn.href = `/admin/gallery/add?category=${encodeURIComponent(category.name)}`;
+      addBtn.innerHTML = `<i class="fas fa-plus"></i> Add New Dish to ${category.name}`;
+    }
 
     // Render Dishes Grid
     const container = document.getElementById('modalDishesContent');
-    if (!category.dishes || category.dishes.length === 0) {
+    if (!dishes || dishes.length === 0) {
       container.innerHTML = `
         <div style="text-align: center; padding: 40px 20px; color: #64748b;">
           <i class="far fa-images" style="font-size: 42px; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
-          <h4 style="font-size: 16px; color: #334155; margin-bottom: 6px;">No Dishes in "${category.name}" Yet</h4>
-          <p style="font-size: 13px; max-width: 400px; margin: 0 auto 16px auto;">Upload your signature food photos and tag them with "${category.name}" to display them here.</p>
-          <a href="/admin/gallery/add?category=${encodeURIComponent(category.name)}" class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px;">
+          <h4 style="font-size: 16px; color: #334155; margin-bottom: 6px;">No Dishes ${categoryName ? 'in "' + categoryName + '" ' : ''}Yet</h4>
+          <p style="font-size: 13px; max-width: 400px; margin: 0 auto 16px auto;">Upload your signature food photos to display them here.</p>
+          <a href="/admin/gallery/add${categoryName ? '?category=' + encodeURIComponent(categoryName) : ''}" class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px;">
             <i class="fas fa-plus"></i> Add First Dish Now
           </a>
         </div>
       `;
     } else {
       let cardsHtml = '<div class="cat-dishes-grid">';
-      category.dishes.forEach(dish => {
+      dishes.forEach(dish => {
         cardsHtml += `
           <div class="cat-dish-card">
             <img src="${dish.image}" alt="${dish.title}" onerror="this.onerror=null;this.src='/images/default-food.jpg';">
@@ -388,7 +412,7 @@
                 <a href="/admin/gallery/edit/${dish.id}" class="cat-btn-sm cat-btn-edit">
                   <i class="fas fa-edit"></i> Edit
                 </a>
-                <a href="/gallery?category=${encodeURIComponent(category.name)}" target="_blank" class="cat-btn-sm cat-btn-view">
+                <a href="/gallery" target="_blank" class="cat-btn-sm cat-btn-view">
                   <i class="fas fa-external-link-alt"></i> View on Site
                 </a>
               </div>
